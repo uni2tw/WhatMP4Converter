@@ -1,6 +1,6 @@
 # WhatMP4Converter
 
-## it's FFMPEG wrapper
+## it's FFmpeg wrapper
 
 the main purpose of the program is convert video to MP4, then play on the browser.  
 
@@ -9,7 +9,7 @@ the features are below.
 2.merge subtitle(ASS) when convert.  
 3.set video width, scale and threads.  
 
-## FFMPEG  
+## FFmpeg  
 https://www.ffmpeg.org/download.html  
 
 ## ICON  
