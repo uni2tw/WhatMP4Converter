@@ -87,6 +87,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -95,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Mp4.ico" />
-    <Content Include="readme.txt" />
+    <Content Include="../readme.md" />
     <Content Include="assets\trayse101-basic-filetypes-1-mp4.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
