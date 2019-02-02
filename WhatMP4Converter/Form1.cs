@@ -19,7 +19,8 @@ namespace WhatMP4Converter
         RichTextBox logBox;
         private void MyInitForm()
         {
-            this.Width = 600;
+            this.Width = 640;
+            this.Height = 320;
             //this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.Text = "MP4 轉檔工具";
             this.listView1.View = View.Details;
@@ -53,6 +54,19 @@ namespace WhatMP4Converter
                 this.lbOutputPath.Text = "同目錄";
             }
             this.timer1.Enabled = this.chkRun.Checked;
+
+            if (conf.Quality.Default.Equals("standard", StringComparison.OrdinalIgnoreCase))
+            {
+                cbCrf.SelectedIndex = 1;
+            }
+            else if (conf.Quality.Default.Equals("high", StringComparison.OrdinalIgnoreCase))
+            {
+                cbCrf.SelectedIndex = 0;
+            }
+            else if (conf.Quality.Default.Equals("low", StringComparison.OrdinalIgnoreCase))
+            {
+                cbCrf.SelectedIndex = 2;
+            }
 
             InitLogBox();
         }
@@ -108,6 +122,7 @@ namespace WhatMP4Converter
                 //if (status == "等候" && workCenter.Exist(srcFilePath)==false && workCenter.AnyRun() == false)
                 if (status == "等候" && workCenter.AnyRun() == false)
                 {
+                    FFmpegQuality crf = (FFmpegQuality)cbCrf.SelectedIndex;
                     Task.Factory.StartNew(delegate ()
                     {
                         QueueConvertWork work = workCenter.StartWork(srcFilePath, destFlePath, conf);
@@ -185,7 +200,7 @@ namespace WhatMP4Converter
                             });
                             
                         };
-                        work.Execute();
+                        work.Execute(crf);
                     });
                     break;
                 }
@@ -193,17 +208,6 @@ namespace WhatMP4Converter
             this.timer1.Enabled = true;
         }
 
-        //public static void SafeInvoke(ListView control, Action handler)
-        //{
-        //    if (control.InvokeRequired)
-        //    {
-        //        control.Invoke(handler);
-        //    }
-        //    else
-        //    {
-        //        handler();
-        //    }
-        //}
         public static void SafeInvoke(Control control, Action handler)
         {
             if (control.InvokeRequired)
@@ -360,6 +364,51 @@ namespace WhatMP4Converter
                     listView1.Visible = true;
                     logBox.Visible = false;
                 }
+            }
+        }
+
+        private void menuItemQuit_Click(object sender, EventArgs e)
+        {
+            if (workCenter.AnyRun())
+            {
+                if (MessageBox.Show("檔案轉換中，確定要中止嗎?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    this.Close();
+                }
+            } else
+            {
+                this.Close();
+            }            
+        }
+
+        private void menuItemSwitchLog_Click(object sender, EventArgs e)
+        {
+            if (listView1.Visible)
+            {
+                listView1.Visible = false;
+                logBox.Visible = true;
+            }
+        }
+
+        private void menuItemSwitchMain_Click(object sender, EventArgs e)
+        {
+            if (listView1.Visible == false)
+            {
+                listView1.Visible = true;
+                logBox.Visible = false;
+            }
+        }
+
+        private void nenuItemOpenFiles_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Title = "Select file";
+            dialog.InitialDirectory = ".\\";
+            dialog.Filter = "影像檔 (*.*)|*.avi;*.mp4;*.mkv;*.rm;*.rmvb;*.wmv";
+            dialog.Multiselect = true;
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                MessageBox.Show(dialog.FileName);
             }
         }
     }

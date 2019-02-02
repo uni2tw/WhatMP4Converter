@@ -32,6 +32,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.listView1 = new System.Windows.Forms.ListView();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.cbCrf = new System.Windows.Forms.ComboBox();
             this.lbOutputPath = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.chkRun = new System.Windows.Forms.CheckBox();
@@ -39,20 +40,26 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.lbFFmpegPath = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.nenuItemOpenFiles = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItemSwitchMain = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItemSwitchLog = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItemQuit = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.listView1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Location = new System.Drawing.Point(0, 24);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(0);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.groupBox1.Size = new System.Drawing.Size(741, 190);
+            this.groupBox1.Size = new System.Drawing.Size(632, 190);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             // 
@@ -64,7 +71,7 @@
             this.listView1.Location = new System.Drawing.Point(5, 15);
             this.listView1.Margin = new System.Windows.Forms.Padding(0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(731, 175);
+            this.listView1.Size = new System.Drawing.Size(622, 175);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.DragDrop += new System.Windows.Forms.DragEventHandler(this.listView1_DragDrop);
@@ -72,14 +79,29 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.cbCrf);
             this.panel1.Controls.Add(this.lbOutputPath);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.chkRun);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 190);
+            this.panel1.Location = new System.Drawing.Point(0, 214);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(741, 58);
+            this.panel1.Size = new System.Drawing.Size(632, 52);
             this.panel1.TabIndex = 3;
+            // 
+            // cbCrf
+            // 
+            this.cbCrf.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cbCrf.FormattingEnabled = true;
+            this.cbCrf.Items.AddRange(new object[] {
+            "壓縮畫質: 好",
+            "壓縮畫質: 標準",
+            "壓縮畫質: 差"});
+            this.cbCrf.Location = new System.Drawing.Point(437, 16);
+            this.cbCrf.Margin = new System.Windows.Forms.Padding(3, 8, 3, 3);
+            this.cbCrf.Name = "cbCrf";
+            this.cbCrf.Size = new System.Drawing.Size(103, 20);
+            this.cbCrf.TabIndex = 6;
             // 
             // lbOutputPath
             // 
@@ -105,9 +127,9 @@
             // 
             this.chkRun.AutoSize = true;
             this.chkRun.Dock = System.Windows.Forms.DockStyle.Right;
-            this.chkRun.Location = new System.Drawing.Point(669, 0);
+            this.chkRun.Location = new System.Drawing.Point(560, 0);
             this.chkRun.Name = "chkRun";
-            this.chkRun.Size = new System.Drawing.Size(72, 58);
+            this.chkRun.Size = new System.Drawing.Size(72, 52);
             this.chkRun.TabIndex = 3;
             this.chkRun.Text = "進行轉換";
             this.chkRun.UseVisualStyleBackColor = true;
@@ -117,9 +139,9 @@
             this.panel2.Controls.Add(this.lbFFmpegPath);
             this.panel2.Controls.Add(this.label1);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel2.Location = new System.Drawing.Point(0, 225);
+            this.panel2.Location = new System.Drawing.Point(0, 258);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(741, 35);
+            this.panel2.Size = new System.Drawing.Size(632, 35);
             this.panel2.TabIndex = 4;
             // 
             // lbFFmpegPath
@@ -142,15 +164,61 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "FFmpeg路徑: ";
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.nenuItemOpenFiles,
+            this.menuItemSwitchMain,
+            this.menuItemSwitchLog,
+            this.menuItemQuit});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(632, 24);
+            this.menuStrip1.TabIndex = 5;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // nenuItemOpenFiles
+            // 
+            this.nenuItemOpenFiles.Name = "nenuItemOpenFiles";
+            this.nenuItemOpenFiles.Size = new System.Drawing.Size(65, 20);
+            this.nenuItemOpenFiles.Text = "選取檔案";
+            this.nenuItemOpenFiles.Click += new System.EventHandler(this.nenuItemOpenFiles_Click);
+            // 
+            // menuItemSwitchMain
+            // 
+            this.menuItemSwitchMain.Name = "menuItemSwitchMain";
+            this.menuItemSwitchMain.Size = new System.Drawing.Size(53, 20);
+            this.menuItemSwitchMain.Text = "主畫面";
+            this.menuItemSwitchMain.Click += new System.EventHandler(this.menuItemSwitchMain_Click);
+            // 
+            // menuItemSwitchLog
+            // 
+            this.menuItemSwitchLog.Name = "menuItemSwitchLog";
+            this.menuItemSwitchLog.Size = new System.Drawing.Size(65, 20);
+            this.menuItemSwitchLog.Text = "日誌畫面";
+            this.menuItemSwitchLog.Click += new System.EventHandler(this.menuItemSwitchLog_Click);
+            // 
+            // menuItemQuit
+            // 
+            this.menuItemQuit.Name = "menuItemQuit";
+            this.menuItemQuit.ShortcutKeyDisplayString = "";
+            this.menuItemQuit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.menuItemQuit.Size = new System.Drawing.Size(41, 20);
+            this.menuItemQuit.Text = "結束";
+            this.menuItemQuit.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal;
+            this.menuItemQuit.Click += new System.EventHandler(this.menuItemQuit_Click);
+            // 
             // formMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(741, 260);
+            this.ClientSize = new System.Drawing.Size(632, 293);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.menuStrip1);
             this.KeyPreview = true;
+            this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "formMain";
@@ -163,7 +231,10 @@
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -179,6 +250,12 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lbOutputPath;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem nenuItemOpenFiles;
+        private System.Windows.Forms.ToolStripMenuItem menuItemSwitchMain;
+        private System.Windows.Forms.ToolStripMenuItem menuItemSwitchLog;
+        private System.Windows.Forms.ToolStripMenuItem menuItemQuit;
+        private System.Windows.Forms.ComboBox cbCrf;
     }
 }
 

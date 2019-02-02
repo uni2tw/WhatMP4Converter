@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WhatMP4Converter.Core
@@ -11,6 +12,8 @@ namespace WhatMP4Converter.Core
         private Process proc;
 
         public AppConf conf;
+
+        public static string _ALLOW_VIDEO_TYPES = "";
 
         public string SrcFilePath { get; set; }
         public string DestFilePath { get; set; }
@@ -48,7 +51,7 @@ namespace WhatMP4Converter.Core
             this.conf = conf;
         }
 
-        public void Execute()
+        public void Execute(FFmpegQuality crf)
         {
             if (OnProgress != null)
             {
@@ -58,7 +61,7 @@ namespace WhatMP4Converter.Core
             result = Info();
             if (result)
             {
-                result = Convert();
+                result = Convert(crf);
             }
             if (OnProgress != null)
             {
@@ -152,10 +155,14 @@ namespace WhatMP4Converter.Core
             return result;
         }
 
-        public bool Convert()
+        private bool Convert(FFmpegQuality quality)
         {
             bool result = true;
+            DateTime startTime = DateTime.Now;
             proc = new Process();
+            //string defaultVideoEncodeParam = "-c:v libx264 -crf 18 -preset slow";
+            string defaultVideoEncodeParam = GetDefaultVideoEncodeParam(quality);
+            
 
             string audioParam;
             if (this.AudioEncodeType.Equals("aac", StringComparison.OrdinalIgnoreCase)) {
@@ -171,7 +178,7 @@ namespace WhatMP4Converter.Core
             }
             else
             {
-                videoParam = "-c:v libx264 -crf 18";
+                videoParam = defaultVideoEncodeParam;
             }
 
             List<string> filters = new List<string>();
@@ -194,7 +201,7 @@ namespace WhatMP4Converter.Core
             if (filters.Count > 0)
             {
                 filtersParam = string.Format("-vf \"{0}\"", string.Join(",", filters));
-                videoParam = "-c:v libx264 -crf 18";
+                videoParam = defaultVideoEncodeParam;
             }
 
             string threadsParam = string.Empty;
@@ -263,7 +270,7 @@ namespace WhatMP4Converter.Core
                         OnProgress(false, false, false, progress);
                     }
                 }
-                if (line ==  "Conversion failed!")
+                if (line ==  "Conversion failed!" || line .Contains("Invalid argument"))
                 {
                     result = false;
                 }
@@ -271,7 +278,47 @@ namespace WhatMP4Converter.Core
             proc.BeginErrorReadLine();
 
             proc.WaitForExit();
+            if (result)
+            {
+                OnLog(string.Format("完成: {0}, 費時: {1} 分",
+                    Path.GetFileName(this.DestFilePath),
+                    (DateTime.Now - startTime).TotalMinutes.ToString("0.#")), LogLevel.Info);
+            }
             return result;            
+        }
+
+        private string GetDefaultVideoEncodeParam(FFmpegQuality quality)
+        {
+            //版本2
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("-c:v libx264 -crf ");
+                if (quality == FFmpegQuality.High)
+                {
+                    sb.Append(conf.Quality.High.Crf);
+                    sb.Append(" -preset ");
+                    sb.Append(conf.Quality.High.Preset.ToString());
+                }
+                else if (quality == FFmpegQuality.Standard)
+                {
+                    sb.Append(conf.Quality.Standard.Crf);
+                    sb.Append(" -preset ");
+                    sb.Append(conf.Quality.Standard.Preset.ToString());
+                }
+                else if (quality == FFmpegQuality.Low)
+                {
+                    sb.Append(conf.Quality.Low.Crf);
+                    sb.Append(" -preset ");
+                    sb.Append(conf.Quality.Low.Preset.ToString());
+                }                
+
+                return sb.ToString();
+            }
+           
+            ////版本 1
+            //{
+            //    return "-c:v libx264 -crf 18 -preset veryslow";
+            //}
         }
 
         public void Stop()
