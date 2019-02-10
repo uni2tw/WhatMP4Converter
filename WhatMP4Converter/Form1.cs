@@ -43,7 +43,7 @@ namespace WhatMP4Converter
             workCenter = new QueueConvertWorkCenter();
             conf = AppConf.Reload();
             chkRun.Checked = conf.Auto;
-            this.lbOutputPath.Text = conf.OutputPath;
+            this.lbOutputPath.Text = conf.Output;
             this.lbFFmpegPath.Text = conf.FFmpeg.Path;
             if (string.IsNullOrEmpty(this.lbFFmpegPath.Text) || Directory.Exists(this.lbFFmpegPath.Text) == false)
             {
@@ -110,13 +110,13 @@ namespace WhatMP4Converter
                 string srcFilePath = li.SubItems[2].Text;
                 string fileNameNoExt = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";
                 string destFlePath;
-                if (string.IsNullOrEmpty(conf.OutputPath))
+                if (string.IsNullOrEmpty(conf.Output))
                 {
                     destFlePath = Path.Combine(Path.GetDirectoryName(srcFilePath), fileNameNoExt);
                 }
                 else
                 {
-                    destFlePath = Path.Combine(conf.OutputPath, fileNameNoExt);
+                    destFlePath = Path.Combine(conf.Output, fileNameNoExt);
                 }
 
                 //if (status == "等候" && workCenter.Exist(srcFilePath)==false && workCenter.AnyRun() == false)
@@ -323,7 +323,7 @@ namespace WhatMP4Converter
         private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
         {
             conf.FFmpeg.Path = lbFFmpegPath.Text;
-            conf.OutputPath = lbOutputPath.Text;
+            conf.Output = lbOutputPath.Text;
             conf.Auto = chkRun.Checked;
             AppConf.Update(conf);
             workCenter.Shutdown();
