@@ -209,7 +209,11 @@ namespace WhatMP4Converter.Core
             {
                 if (conf.Threads.Auto)
                 {
-                    threadsParam = string.Format("-threads {0}", Helper.GetCpuCoreNumber() - 1);
+                    int recommendThreadCount = (int)(Helper.GetCpuCoreNumber() * 0.75d);
+                    if (recommendThreadCount > 0)
+                    {
+                        threadsParam = string.Format("-threads {0}", recommendThreadCount);
+                    }
                 }
                 else
                 {

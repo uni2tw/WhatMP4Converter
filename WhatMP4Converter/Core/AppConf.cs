@@ -161,27 +161,26 @@ namespace WhatMP4Converter.Core
 
         #region utils
 
-        public int ParseInt32(string str)
+        private int ParseInt32(string str)
         {
             int result;
             int.TryParse(str, out result);
             return result;
         }
 
-        public void RenderNullableInt(StringBuilder sb, string keyName, string tab, int? number)
+        private void RenderNullableInt(StringBuilder sb, string keyName, string tab, int? number)
         {
             sb.Append(tab);
-            if (number == null)
-            {
-                sb.Append("#");
-            }            
             sb.Append(keyName);
             sb.Append(" ");
-            sb.Append(number.GetValueOrDefault());
+            if (number != null)
+            {
+                sb.Append(number.Value);
+            }
             sb.AppendLine();
         }
 
-        public string RenderString(string outputPath)
+        private string RenderString(string outputPath)
         {
             if (outputPath.Contains(" "))
             {
@@ -190,7 +189,7 @@ namespace WhatMP4Converter.Core
             return outputPath;
         }
 
-        public string[] SplitString(string line)
+        private string[] SplitString(string line)
         {
             List<string> result = new List<string>();
 
@@ -246,12 +245,12 @@ namespace WhatMP4Converter.Core
             return result.ToArray();
         }
 
-        public string RenderBool(bool auto)
+        private string RenderBool(bool auto)
         {
             return auto ? "on" : "off";
         }
 
-        public bool ParseBool(string val)
+        private bool ParseBool(string val)
         {
             if (val == "on" || val == "1" || val.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
