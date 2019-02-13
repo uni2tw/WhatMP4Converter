@@ -73,17 +73,11 @@ namespace WhatMP4Converter.Core
         private bool Info()
         {
             bool result = true;
-            proc = new Process();
             string argument = string.Format(" -i \"{0}\" -hide_banner",
                             SrcFilePath);
             OnLog("ffmpeg.exe " + argument, LogLevel.Info);
-            proc.StartInfo.FileName = Path.Combine(conf.FFmpeg.Path, "ffmpeg.exe");
-            proc.StartInfo.Arguments = argument;
-            proc.StartInfo.CreateNoWindow = true;
-            proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.StartInfo.RedirectStandardOutput = true;
+            proc = FFmpegTaskBase.CreateProc(conf.FFmpeg.Path);            
+            proc.StartInfo.Arguments = argument;            
             proc.Start();
             proc.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) {
                 string line = e.Data;
@@ -229,13 +223,8 @@ namespace WhatMP4Converter.Core
                             threadsParam,
                             DestFilePath);
             OnLog("ffmpeg.exe " + argument, LogLevel.Info);
-            proc.StartInfo.FileName = Path.Combine(conf.FFmpeg.Path, "ffmpeg.exe");
-            proc.StartInfo.Arguments = argument;
-            proc.StartInfo.CreateNoWindow = true;
-            proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;      
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.StartInfo.RedirectStandardOutput = true;
+            proc = FFmpegTaskBase.CreateProc(conf.FFmpeg.Path);
+            proc.StartInfo.Arguments = argument;            
             proc.Start();
             proc.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) {
                 string line = e.Data;

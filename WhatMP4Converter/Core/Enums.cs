@@ -24,4 +24,10 @@ namespace WhatMP4Converter.Core
         slower = 6,
         veryslow = 7
     }
+
+    public enum OperatingMode
+    {
+        Convert,
+        Merge
+    }
 }

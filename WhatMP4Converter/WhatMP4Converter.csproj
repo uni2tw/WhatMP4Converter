@@ -52,9 +52,9 @@
     <Compile Include="Core\AppConf.cs" />
     <Compile Include="Core\Enums.cs" />
     <Compile Include="Core\Extensions.cs" />
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Core\FFmpegMergeTask.cs" />
+    <Compile Include="Core\FFmpegTaskBase.cs" />
+    <Compile Include="Form1.cs" />
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
