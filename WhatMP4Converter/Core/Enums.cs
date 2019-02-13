@@ -27,7 +27,8 @@ namespace WhatMP4Converter.Core
 
     public enum OperatingMode
     {
-        Convert,
-        Merge
+        None = -1,
+        Convert = 0,
+        Merge = 1
     }
 }

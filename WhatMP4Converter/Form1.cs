@@ -2,31 +2,30 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WhatMP4Converter.Core;
 
 namespace WhatMP4Converter
 {
-    public class LiveViewColumns
-    {
-        public static int TaskId = 3;
-        public static int Mode = 4;
-        public static int InTask = 5;
-    }
-
     public partial class formMain : Form
     {
+        public class LiveViewColumns
+        {
+            public static int TaskId = 3;
+            public static int Mode = 4;
+            public static int InTask = 5;
+        }
         public formMain()
         {
             InitializeComponent();
             MyInitForm();
         }
-        private QueueConvertWorkCenter workCenter;
+
         private AppConf conf;
         RichTextBox logBox;
-
-
 
         private void MyInitForm()
         {
@@ -60,7 +59,6 @@ namespace WhatMP4Converter
             //Config.FFmpegPath = this.lbFFmpegPath.Text = @"C:\tools\ffmpeg2\bin\";
             Console.WriteLine("form start.");
 
-            workCenter = new QueueConvertWorkCenter();
             conf = AppConf.Reload();
             chkRun.Checked = conf.Auto;
             this.lbOutputPath.Text = conf.Output;
@@ -91,6 +89,22 @@ namespace WhatMP4Converter
             InitLogBox();
         }
 
+        /// <summary>
+        /// 解開嵌入resource的ffmpeg.exe 
+        /// </summary>
+        private void InitResource()
+        {
+            string ffmpegExePath = Helper.GetRelativePath("ffmpeg.exe");
+            if (File.Exists(ffmpegExePath) == false)
+            {
+                using (FileStream fs = new FileStream(ffmpegExePath, FileMode.CreateNew, FileAccess.Write))
+                {
+                    Stream resource = Assembly.GetEntryAssembly().GetManifestResourceStream("WhatMP4Converter.assets.ffmpeg.exe");
+                    resource.CopyTo(fs);
+                }
+            }
+        }
+
         private void InitLogBox()
         {
             logBox = new RichTextBox();
@@ -116,6 +130,9 @@ namespace WhatMP4Converter
                 return (OperatingMode)tabControl1.SelectedIndex;
             }
         }
+
+        private FFmpegTaskBase currentTask;
+
         private void ChkRun_CheckedChanged(object sender, EventArgs e)
         {
             this.timer1.Enabled = this.chkRun.Checked;
@@ -123,118 +140,198 @@ namespace WhatMP4Converter
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            if (workCenter.AnyRun())
-            {
-                return;
-            }
-
             this.timer1.Enabled = false;
-            if (this.Mode == OperatingMode.Convert)
+
+            try
             {
-                foreach (ListViewItem li in this.listView1.Items)
+                if (this.currentTask != null)
                 {
-                    string status = li.SubItems[1].Text;
-                    string srcFilePath = li.SubItems[2].Text;
-                    string fileNameNoExt = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";
-                    string destFlePath;
-                    if (string.IsNullOrEmpty(conf.Output))
+                    return;
+                }
+                string theTaskId = null;
+                OperatingMode mode = OperatingMode.None;
+                foreach (ListViewItem item in this.listView1.Items)
+                {
+                    string inTask = item.SubItems[LiveViewColumns.InTask].Text;
+                    if (inTask == "0")
                     {
-                        destFlePath = Path.Combine(Path.GetDirectoryName(srcFilePath), fileNameNoExt);
-                    }
-                    else
-                    {
-                        destFlePath = Path.Combine(conf.Output, fileNameNoExt);
-                    }
-
-                    if (status == "等候" && workCenter.AnyRun() == false)
-                    {
-                        FFmpegQuality crf = (FFmpegQuality)cbCrf.SelectedIndex;
-                        Task.Factory.StartNew(delegate ()
-                        {
-                            QueueConvertWork work = workCenter.StartWork(srcFilePath, destFlePath, conf);
-                            work.OnProgress += delegate (bool isStart, bool isFinish, bool result, double progress)
-                            {
-                                if (isStart)
-                                {
-                                    SafeInvoke(this.listView1, delegate ()
-                                    {
-                                        foreach (ListViewItem item in this.listView1.Items)
-                                        {
-                                            string filePath = item.SubItems[2].Text;
-                                            if (filePath == work.SrcFilePath)
-                                            {
-                                                item.SubItems[1].Text = "轉換";
-                                            }
-                                        }
-                                    });
-                                    Console.Write("開始 {0}.{1}",
-                                        work.SrcFilePath, Environment.NewLine);
-                                }
-                                else if (isFinish)
-                                {
-                                    SafeInvoke(this.listView1, delegate ()
-                                    {
-                                        foreach (ListViewItem item in this.listView1.Items)
-                                        {
-                                            string filePath = item.SubItems[2].Text;
-                                            if (filePath == work.SrcFilePath)
-                                            {
-                                                if (result)
-                                                {
-                                                    item.SubItems[1].Text = "完成";
-                                                }
-                                                else
-                                                {
-                                                    item.SubItems[1].Text = "失敗";
-                                                }
-                                            }
-                                        }
-                                    });
-                                    Console.Write("完成 {0}.{1}",
-                                        work.SrcFilePath, Environment.NewLine);
-                                }
-                                else
-                                {
-                                    SafeInvoke(this.listView1, delegate ()
-                                    {
-                                        foreach (ListViewItem item in this.listView1.Items)
-                                        {
-                                            string filePath = item.SubItems[2].Text;
-                                            if (filePath == work.SrcFilePath)
-                                            {
-                                                item.SubItems[1].Text = string.Format("{0:0.##\\%}", progress * 100);
-                                            }
-                                        }
-                                    });
-                                    Console.Write("轉換 {0} ==> {1}.{2}",
-                                        work.SrcFilePath,
-                                        string.Format("{0:0.##\\%}", progress * 100),
-                                        Environment.NewLine);
-                                }
-                            };
-                            work.OnLog += delegate (string str, LogLevel level)
-                            {
-                                SafeInvoke(logBox, delegate ()
-                                {
-                                    if (level == LogLevel.Debug)
-                                    {
-                                        logBox.AppendText(str + Environment.NewLine);
-                                    }
-                                    else if (level == LogLevel.Info)
-                                    {
-                                        logBox.AppendText(str + Environment.NewLine, Color.Blue);
-                                    }
-                                });
-
-                            };
-                            work.Execute(crf);
-                        });
+                        theTaskId = item.SubItems[3].Text;
+                        mode = (OperatingMode)Enum.Parse(typeof(OperatingMode), item.SubItems[LiveViewColumns.Mode].Text);
                         break;
                     }
                 }
+                if (theTaskId == null)
+                {
+                    //MessageBox.Show("沒有需要合併的MP4");                
+                    return;
+                }
+
+                if (mode == OperatingMode.Convert)
+                {
+                    string srcFilePath = null;
+                    string destFlePath = null;
+                    foreach (ListViewItem item in this.listView1.Items)
+                    {
+                        string itemTaskId = item.SubItems[LiveViewColumns.TaskId].Text;
+                        if (itemTaskId != theTaskId)
+                        {
+                            continue;
+                        }
+                        srcFilePath = item.SubItems[2].Text;
+                        string renameToMP4 = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";
+                        if (string.IsNullOrEmpty(conf.Output))
+                        {
+                            destFlePath = Path.Combine(Path.GetDirectoryName(srcFilePath), renameToMP4);
+                        }
+                        else
+                        {
+                            destFlePath = Path.Combine(conf.Output, renameToMP4);
+                        }
+                        item.SubItems[LiveViewColumns.InTask].Text = "1";
+                        break;
+                    }
+                    FFmpegQuality crf = (FFmpegQuality)cbCrf.SelectedIndex;
+                    var asyncTask = Task.Factory.StartNew(delegate ()
+                    {                        
+                        var task = new FFmpegConvertTask(this.conf, theTaskId);
+                        this.currentTask = task;
+                        task.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress, string taskId)
+                        {
+                            SafeInvoke(listView1, delegate ()
+                            {
+                                foreach (ListViewItem item in this.listView1.Items)
+                                {
+                                    string itemTsakId = item.SubItems[3].Text;
+                                    if (itemTsakId != taskId)
+                                    {
+                                        continue;
+                                    }
+                                    if (isStart)
+                                    {
+                                        item.SubItems[1].Text = "轉換";
+                                    }
+                                    else if (isFinish && isFail == true)
+                                    {
+                                        item.SubItems[1].Text = "完成";
+                                    }
+                                    else if (isFinish && isFail == false)
+                                    {
+                                        item.SubItems[1].Text = "失敗";
+                                    }
+                                    else
+                                    {
+                                        item.SubItems[1].Text = string.Format("{0:0.##\\%}", progress * 100);
+                                    }
+                                }
+                            });
+                        };
+                        task.OnLog += delegate (string str, LogLevel level)
+                        {
+                            SafeInvoke(logBox, delegate ()
+                            {
+                                if (level == LogLevel.Debug)
+                                {
+                                    logBox.AppendText(str + Environment.NewLine);
+                                }
+                                else if (level == LogLevel.Info)
+                                {
+                                    logBox.AppendText(str + Environment.NewLine, Color.Blue);
+                                }
+                            });
+
+                        };
+                        task.SrcFilePath = srcFilePath;
+                        task.DestFilePath = destFlePath;
+                        task.Quality = crf;
+                        task.Execute();
+                    });
+                    asyncTask.ContinueWith(delegate (Task t)
+                    {
+                        this.currentTask = null;
+                    });
+                }
+                else if (mode == OperatingMode.Merge)
+                {
+                    List<string> inputFiles = new List<string>();
+                    foreach (ListViewItem item in this.listView1.Items)
+                    {
+                        string itemTaskId = item.SubItems[LiveViewColumns.TaskId].Text;
+                        if (itemTaskId != theTaskId)
+                        {
+                            continue;
+                        }
+                        string filePath = item.SubItems[2].Text;
+                        inputFiles.Add(filePath);
+                        item.SubItems[LiveViewColumns.InTask].Text = "1";
+                    }
+
+                    var asyncTask = Task.Factory.StartNew(delegate ()
+                    {
+                        var task = new FFmpegMergeTask(this.conf, theTaskId);
+                        this.currentTask = task;
+                        task.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress, string taskId)
+                        {
+                            SafeInvoke(listView1, delegate ()
+                            {
+                                foreach (ListViewItem item in this.listView1.Items)
+                                {
+                                    string itemTsakId = item.SubItems[3].Text;
+                                    if (itemTsakId != taskId)
+                                    {
+                                        continue;
+                                    }
+                                    if (isStart)
+                                    {
+                                        item.SubItems[1].Text = "開始合併";
+                                    }
+                                    else if (isFinish && isFail == true)
+                                    {
+                                        item.SubItems[1].Text = "合併完成";
+                                    }
+                                    else if (isFinish && isFail == false)
+                                    {
+                                        item.SubItems[1].Text = "合併失敗";
+                                    }
+                                    else
+                                    {
+                                        item.SubItems[1].Text = string.Format("{0:0.##\\%}", progress * 100);
+                                    }
+                                }
+                            });
+                        };
+
+                        task.OnLog += delegate (string str, LogLevel level)
+                        {
+                            SafeInvoke(logBox, delegate ()
+                            {
+                                if (level == LogLevel.Debug)
+                                {
+                                    logBox.Invoke((MethodInvoker)(
+                                        () => logBox.AppendText(str + Environment.NewLine)));
+                                }
+                                else if (level == LogLevel.Info)
+                                {
+                                    logBox.Invoke((MethodInvoker)(
+                                        () => logBox.AppendText(str + Environment.NewLine, Color.Blue)));
+                                }
+                            });
+                        };
+
+                        task.InputFiles = inputFiles;
+
+                        task.Execute();
+                    });
+                    asyncTask.ContinueWith(delegate (Task t)
+                    {
+                        this.currentTask = null;
+                    });
+                }
+            }
+            finally
+            {
+                this.timer1.Enabled = true;
             }
 
-            this.timer1.Enabled = true;
         }
 
         public static void SafeInvoke(Control control, Action handler)
@@ -302,7 +399,8 @@ namespace WhatMP4Converter
                 }
                 string fileName= Path.GetFileName(filePath);
                 string ext = Path.GetExtension(filePath);
-                if (ext != ".mkv"
+                if (this.Mode== OperatingMode.Convert 
+                    && ext != ".mkv"
                     && ext != ".rm"
                     && ext != ".rmvb"
                     && ext != ".wmv"
@@ -312,9 +410,19 @@ namespace WhatMP4Converter
                     MessageBox.Show("此格式不支援");
                     return;
                 }
+                if (this.Mode == OperatingMode.Merge
+                    && ext != ".mp4")
+                {
+                    MessageBox.Show("合併模式只支援MP4");
+                    return;
+                }
                 this.listView1.Items.Add(
                     new ListViewItem(new string[] {
                         fileName, "等候", filePath, taskGroupId, this.Mode.ToString(), "0" }));
+                if (this.Mode == OperatingMode.Convert)
+                {
+                    taskGroupId = Guid.NewGuid().ToString();
+                }
             }
 
         }
@@ -351,7 +459,6 @@ namespace WhatMP4Converter
             conf.Output = lbOutputPath.Text;
             conf.Auto = chkRun.Checked;
             AppConf.Update(conf);
-            workCenter.Shutdown();
         }
 
         private void lbOutputPath_Click(object sender, EventArgs e)
@@ -394,16 +501,7 @@ namespace WhatMP4Converter
 
         private void menuItemQuit_Click(object sender, EventArgs e)
         {
-            if (workCenter.AnyRun())
-            {
-                if (MessageBox.Show("檔案轉換中，確定要中止嗎?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                {
-                    this.Close();
-                }
-            } else
-            {
-                this.Close();
-            }            
+            this.Close();       
         }
 
         private void menuItemSwitchLog_Click(object sender, EventArgs e)
@@ -437,97 +535,19 @@ namespace WhatMP4Converter
             }
         }
 
-        private void Button1_Click(object sender, EventArgs e)
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (this.Mode == OperatingMode.Merge)
+            if (this.currentTask != null)
             {
-                string taskId = null;
-                List<string> inputFiles = new List<string>();
-
-                foreach (ListViewItem item in this.listView1.Items)
-                {                    
-                    string inTask = item.SubItems[LiveViewColumns.InTask].Text;
-                    if (inTask == "0")
-                    {
-                        taskId = item.SubItems[3].Text;
-                        break;
-                    }
-                }
-                if (taskId == null)
+                if (MessageBox.Show("檔案轉換中，確定要中止嗎?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    MessageBox.Show("沒有需要合併的MP4");
-                    return;
+                    this.currentTask.Stop();
                 }
-                foreach (ListViewItem item in this.listView1.Items)
+                else
                 {
-                    string itemTaskId = item.SubItems[LiveViewColumns.TaskId].Text;
-                    if (itemTaskId != taskId)
-                    {
-                        continue;
-                    }
-                    string filePath = item.SubItems[2].Text;
-                    inputFiles.Add(filePath);
-                    item.SubItems[LiveViewColumns.InTask].Text = "1";
+                    e.Cancel = true;
                 }
-
-                Task.Factory.StartNew(delegate ()
-                {
-                    var task = new FFmpegMergeTask(this.conf, taskId);
-                    task.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress, string taskid)
-                    {
-                        SafeInvoke(listView1, delegate ()
-                        {
-                            foreach (ListViewItem item in this.listView1.Items)
-                            {
-                                string itemTsakId = item.SubItems[3].Text;
-                                if (itemTsakId != taskId)
-                                {
-                                    continue;
-                                }
-                                if (isStart)
-                                {
-                                    item.SubItems[1].Text = "開始合併";
-                                }
-                                else if (isFinish && isFail == true)
-                                {
-                                    item.SubItems[1].Text = "合併完成";
-                                }
-                                else if (isFinish && isFail == false)
-                                {
-                                    item.SubItems[1].Text = "合併失敗";
-                                }
-                                else
-                                {
-                                    item.SubItems[1].Text = string.Format("{0:0.##\\%}", progress * 100);
-                                }
-                            }
-                        });
-                    };
-
-                    task.OnLog += delegate (string str, LogLevel level)
-                    {
-                        SafeInvoke(logBox, delegate ()
-                        {
-                            if (level == LogLevel.Debug)
-                            {
-                                logBox.Invoke((MethodInvoker)(
-                                    () => logBox.AppendText(str + Environment.NewLine)));
-                            }
-                            else if (level == LogLevel.Info)
-                            {
-                                logBox.Invoke((MethodInvoker)(
-                                    () => logBox.AppendText(str + Environment.NewLine, Color.Blue)));
-                            }
-                        });
-                    };
-
-                    task.InputFiles = inputFiles;
-
-                    task.Execute();
-                });
-
             }
         }
-        
     }
 }

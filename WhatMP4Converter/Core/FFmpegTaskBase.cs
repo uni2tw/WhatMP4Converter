@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace WhatMP4Converter.Core
 {
@@ -22,7 +23,7 @@ namespace WhatMP4Converter.Core
         public string SrcFilePath { get; set; }
         public string DestFilePath { get; set; }
 
-        protected bool IsClosed { get; set; }
+        public bool IsClosed { get; set; }
 
         protected abstract void DoExecute();
 
