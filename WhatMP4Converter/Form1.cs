@@ -365,9 +365,12 @@ namespace WhatMP4Converter
             {
                 string ext = Path.GetExtension(filePath).ToLower();
                 if (ext != ".mkv"
+                                && ext != ".rm"
                                 && ext != ".rmvb"
                                 && ext != ".wmv"
                                 && ext != ".mp4"
+                                && ext != ".mpg"
+                                && ext != ".mpeg"
                                 && ext != ".avi")
                 {
                     allowDrop = false;
@@ -405,6 +408,8 @@ namespace WhatMP4Converter
                     && ext != ".rmvb"
                     && ext != ".wmv"
                     && ext != ".mp4"
+                    && ext != ".mpg"
+                    && ext != ".mpeg"
                     && ext != ".avi")
                 {
                     MessageBox.Show("此格式不支援");
@@ -548,6 +553,14 @@ namespace WhatMP4Converter
                     e.Cancel = true;
                 }
             }
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            FormCutPreview previewForm = new FormCutPreview();
+            previewForm.conf = this.conf;
+            previewForm.ShowDialog();
+            previewForm.Dispose();
         }
     }
 }

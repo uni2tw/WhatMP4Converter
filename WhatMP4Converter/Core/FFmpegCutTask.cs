@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace WhatMP4Converter.Core
 {
-    public class FFmpegConvertTask : FFmpegTaskBase
+    public class FFmpegCutTask : FFmpegTaskBase
     {
+
         public FFmpegQuality Quality { get; set; }
 
         public TimeSpan? Duration { get; set; }
@@ -17,48 +20,53 @@ namespace WhatMP4Converter.Core
         public string VideoEncodeType { get; set; }
         public string AudioEncodeType { get; set; }
 
-        public string AssFilePath { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan ToTime { get; set; }
 
         private Regex regexDuration = new Regex(@"Duration: ([\d:.]*),",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private Regex regexTime = new Regex(@"time=([\d:.]*) bitrate=",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-        private Regex regexAudio = new Regex(@"Audio: ([\w]+)[ ,]",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-        //v1
-        //private Regex regexVideo = new Regex(@"Video: ([\w]+) [\w /,()]+, ([\d]{2,4})x([\d]{2,4})",
-        //            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-        //v2
-        private Regex regexVideo = new Regex(@"Video: ([\w]+)[\w \/,()]+, ([\d]{2,4})x([\d]{2,4})",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-
-        //Video: ([\w]+)[\w \/,()]+, ([\d]{2,4})x([\d]{2,4})
-
-
-        public FFmpegConvertTask(AppConf conf, string taskId) : base(conf, taskId)
+      
+        public FFmpegCutTask(AppConf conf, string taskId) : base(conf, taskId)
         {
         }
 
+        public bool IsPreview { get; set; }
         protected override void DoExecute()
         {
             this.Result = DoInfo();
             if (this.Result)
             {
-                this.Result = DoConvert();
+                this.Result = DoPreview(this.IsPreview);
             }
         }
 
-        private bool DoConvert()
+        private bool DoInfo()
+        {
+            FFmpegInfoTask infoTask = new FFmpegInfoTask(this.conf, Guid.NewGuid().ToString());
+            infoTask.SrcFilePath = this.SrcFilePath;
+            infoTask.Execute();
+            if (infoTask.Result == false)
+            {
+                return false;
+            }
+            this.Duration = infoTask.Duration;
+            this.VideoEncodeType = infoTask.VideoEncodeType;
+            this.VideoWidth = infoTask.VideoWidth;
+            this.VideoHeight = infoTask.VideoHeight;
+            this.AudioEncodeType = infoTask.AudioEncodeType;
+            return true;
+        }
+
+        private bool DoPreview(bool isPrview)
         {
             bool result = true;
             DateTime startTime = DateTime.Now;
             proc = new Process();
             string defaultVideoEncodeParam = GetDefaultVideoEncodeParam(Quality);
+            string previewVideoEncodeParam = GetPreviewVideoEncodeParam(Quality);
 
             string audioParam;
             if (this.AudioEncodeType.Equals("aac", StringComparison.OrdinalIgnoreCase))
@@ -74,30 +82,29 @@ namespace WhatMP4Converter.Core
             {
                 videoParam = "-c:v copy";
             }
-            else
+            else if (IsPreview)
+            {
+                videoParam = previewVideoEncodeParam;
+            } else
             {
                 videoParam = defaultVideoEncodeParam;
             }
+            string startToParam = string.Format("-ss {0:00}:{1:00}:{2:00}.{3:000} -to {4:00}:{5:00}:{6:00}.{7:000}",
+                this.StartTime.Hours,
+                this.StartTime.Minutes,
+                this.StartTime.Seconds,
+                this.StartTime.Milliseconds,
+                this.ToTime.Hours,
+                this.ToTime.Minutes,
+                this.ToTime.Seconds,
+                this.ToTime.Milliseconds);
+
+            if (this.IsPreview)
+            {
+                DestFilePath = Helper.AppendFileName(DestFilePath, DateTime.Now.Ticks.ToString());
+            }
 
             List<string> filters = new List<string>();
-
-
-            string ext = Path.GetExtension(this.SrcFilePath);
-            this.AssFilePath = this.SrcFilePath.Replace(ext, string.Empty) + ".ass";
-            if (File.Exists(this.AssFilePath) == false)
-            {
-                this.AssFilePath = null;
-            }
-            else
-            {
-                WriteLog("合併字幕: " + Path.GetFileName(this.AssFilePath), LogLevel.Info);
-            }
-            if (string.IsNullOrEmpty(this.AssFilePath) == false && File.Exists(this.AssFilePath))
-            {
-                string assFileName = Path.GetFileName(this.AssFilePath);
-                File.Copy(this.AssFilePath, Helper.GetRelativePath(assFileName), true);
-                filters.Add(string.Format("subtitles='{0}'", assFileName));
-            }
 
             int videoWidth;
             if (conf.Shrink != null && conf.Shrink.Auto && conf.Shrink.Width > 0 &&
@@ -130,8 +137,9 @@ namespace WhatMP4Converter.Core
                 }
             }
 
-            string argument = string.Format(" -y -i \"{0}\" -strict -2 {1} {2} {3} {4} \"{5}\"",
+            string argument = string.Format(" -y -i \"{0}\" {1} -strict -2 {2} {3} {4} {5} \"{6}\"",
                             SrcFilePath,
+                            startToParam,
                             videoParam,
                             audioParam,
                             filtersParam,
@@ -153,9 +161,9 @@ namespace WhatMP4Converter.Core
                 {
                     return;
                 }
-                
+
                 WriteLog(line, LogLevel.Debug);
-                
+
                 {
                     Match match = regexDuration.Match(line);
                     if (match.Success)
@@ -191,67 +199,17 @@ namespace WhatMP4Converter.Core
             return result;
         }
 
-        private bool DoInfo()
-        {
-            bool result = true;
-            string argument = string.Format(" -i \"{0}\" -hide_banner",
-                            SrcFilePath);
-            WriteLog("ffmpeg.exe " + argument, LogLevel.Info);
-            proc = FFmpegTaskBase.CreateProc(conf.FFmpeg.Path);
-            proc.StartInfo.Arguments = argument;
-            proc.Start();
-            proc.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) {
-                string line = e.Data;                
-                WriteLog(line, LogLevel.Debug);                
-            };
-            proc.BeginOutputReadLine();
-            proc.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs e) {
-                string line = e.Data;
-                if (string.IsNullOrEmpty(line))
-                {
-                    return;
-                }                
-                WriteLog(line, LogLevel.Debug);
-                if (string.IsNullOrEmpty(this.AudioEncodeType))
-                {
-                    Match match = regexAudio.Match(line);
-                    if (match.Success)
-                    {
-                        this.AudioEncodeType = match.Groups[1].Value;
-                        WriteLog(string.Format("Audio: {0}", this.AudioEncodeType), LogLevel.Info);
-                    }
-                }
-                if (string.IsNullOrEmpty(this.VideoEncodeType))
-                {
-                    Match match = regexVideo.Match(line);
-                    if (match.Success)
-                    {
-                        this.VideoEncodeType = match.Groups[1].Value;
-                        this.VideoWidth = match.Groups[2].Value;
-                        this.VideoHeight = match.Groups[3].Value;
-
-                        WriteLog(string.Format("Video: {0} {1}x{2}",
-                            this.VideoEncodeType, this.VideoWidth, this.VideoHeight), LogLevel.Info);
-                    }
-                }
-                Console.WriteLine(line);
-            };
-            proc.BeginErrorReadLine();
-
-            proc.WaitForExit();
-
-            if (string.IsNullOrEmpty(this.VideoEncodeType) ||
-                string.IsNullOrEmpty(this.AudioEncodeType))
-            {
-                result = false;
-            }
-
-            return result;
-        }
-
         protected override bool PreCheck()
         {
+            if (string.IsNullOrEmpty(DestFilePath))
+            {
+                return false;
+            }
             if (File.Exists(this.SrcFilePath) == false)
+            {
+                return false;
+            }
+            if (ToTime == TimeSpan.Zero || StartTime > ToTime)
             {
                 return false;
             }
@@ -260,6 +218,10 @@ namespace WhatMP4Converter.Core
 
         private string GetDefaultVideoEncodeParam(FFmpegQuality quality)
         {
+            if (this.IsPreview)
+            {
+                return "-c:v libx264 -crf 27 -preset ultrafast";
+            }
             //版本2
             {
                 StringBuilder sb = new StringBuilder();
@@ -290,6 +252,11 @@ namespace WhatMP4Converter.Core
             //{
             //    return "-c:v libx264 -crf 18 -preset veryslow";
             //}
+        }
+
+        private string GetPreviewVideoEncodeParam(FFmpegQuality quality)
+        {
+            return "-c:v libx264 -crf 27 -preset ultrafast";
         }
     }
 }

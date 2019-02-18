@@ -36,5 +36,22 @@ namespace WhatMP4Converter.Core
         {
             return Environment.ProcessorCount;
         }
+
+        public static string AppendFileName(string fileName, string appendStr)
+        {
+            string dirName = Path.GetDirectoryName(fileName);
+            string mainName = Path.GetFileNameWithoutExtension(fileName);
+            string extName = Path.GetExtension(fileName);
+            
+            string newFileName = string.Format("{0}{1}{2}",
+                mainName,
+                appendStr,
+                extName);
+            if (string.IsNullOrEmpty(dirName) == false)
+            {
+                return Path.Combine(dirName, newFileName);
+            }
+            return newFileName;
+        }
     }
 }
