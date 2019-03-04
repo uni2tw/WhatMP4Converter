@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace WhatMP4Converter.Core
@@ -52,6 +54,61 @@ namespace WhatMP4Converter.Core
                 return Path.Combine(dirName, newFileName);
             }
             return newFileName;
+        }
+
+        public static bool TryFindAssFile(string srcFilePath, out string assFilePath, out List<string> assFilePaths)
+        {
+            assFilePath = null;
+            assFilePaths = new List<string>();
+
+            FileInfo fiInfo = new FileInfo(srcFilePath);
+            if (fiInfo.Exists == false)
+            {
+                return false;
+            }
+
+            string srcMajorName = Path.GetFileNameWithoutExtension(srcFilePath);            
+
+            foreach (var fi in fiInfo.Directory.GetFiles())
+            {
+                string targetMarjorName = Path.GetFileNameWithoutExtension(fi.Name);
+                string targetExtName = Path.GetExtension(fi.Name);
+
+                if (targetExtName.Equals(".ass", StringComparison.OrdinalIgnoreCase) == false)
+                {
+                    continue;
+                }
+
+                if (IsPartialFileName(targetMarjorName, srcMajorName))
+                {
+                    assFilePaths.Add(fi.FullName);
+                }
+            }
+
+            assFilePath = assFilePaths.FirstOrDefault();
+
+            return assFilePath != null;
+        }
+
+        private static bool IsPartialFileName(string targetMarjorName, string srcMajorName)
+        {
+            if (string.IsNullOrEmpty(targetMarjorName) || string.IsNullOrEmpty(srcMajorName))
+            {
+                return false;
+            }
+            targetMarjorName = targetMarjorName.ToLower();
+            srcMajorName = srcMajorName.ToLower();
+
+            if (srcMajorName.Equals(targetMarjorName))
+            {
+                return true;
+            }
+            if (targetMarjorName.StartsWith(srcMajorName + "."))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

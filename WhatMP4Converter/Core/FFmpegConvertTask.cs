@@ -83,13 +83,11 @@ namespace WhatMP4Converter.Core
 
 
             string ext = Path.GetExtension(this.SrcFilePath);
-            this.AssFilePath = this.SrcFilePath.Replace(ext, string.Empty) + ".ass";
-            if (File.Exists(this.AssFilePath) == false)
+            string assFilePath = null;
+            List<string> assFilePaths;
+            if (Helper.TryFindAssFile(this.SrcFilePath, out assFilePath, out assFilePaths))
             {
-                this.AssFilePath = null;
-            }
-            else
-            {
+                this.AssFilePath = assFilePath;
                 WriteLog("合併字幕: " + Path.GetFileName(this.AssFilePath), LogLevel.Info);
             }
             if (string.IsNullOrEmpty(this.AssFilePath) == false && File.Exists(this.AssFilePath))
@@ -258,38 +256,5 @@ namespace WhatMP4Converter.Core
             return true;
         }
 
-        private string GetDefaultVideoEncodeParam(FFmpegQuality quality)
-        {
-            //版本2
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append("-c:v libx264 -crf ");
-                if (quality == FFmpegQuality.High)
-                {
-                    sb.Append(conf.Quality.High.Crf);
-                    sb.Append(" -preset ");
-                    sb.Append(conf.Quality.High.Preset.ToString());
-                }
-                else if (quality == FFmpegQuality.Standard)
-                {
-                    sb.Append(conf.Quality.Standard.Crf);
-                    sb.Append(" -preset ");
-                    sb.Append(conf.Quality.Standard.Preset.ToString());
-                }
-                else if (quality == FFmpegQuality.Low)
-                {
-                    sb.Append(conf.Quality.Low.Crf);
-                    sb.Append(" -preset ");
-                    sb.Append(conf.Quality.Low.Preset.ToString());
-                }
-
-                return sb.ToString();
-            }
-
-            ////版本 1
-            //{
-            //    return "-c:v libx264 -crf 18 -preset veryslow";
-            //}
-        }
     }
 }

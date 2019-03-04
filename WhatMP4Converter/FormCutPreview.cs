@@ -9,7 +9,11 @@ namespace WhatMP4Converter
     public partial class FormCutPreview : Form
     {
         int pointerPos = 1;
-        string srcFilePath = @"t:\01.mp4";
+        public string SrcFilePath;
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan TotTime { get; set; }
+
+        public bool Result { get; set; }
 
         public AppConf conf;
         public FormCutPreview()
@@ -20,8 +24,11 @@ namespace WhatMP4Converter
 
         private void FormCutPreview_Load(object sender, EventArgs e)
         {
-
-
+            if (File.Exists(this.SrcFilePath) == false || Path.GetExtension(this.SrcFilePath).ToLower() != ".mp4")
+            {
+                Result = false;
+                Close();
+            }
         }
 
         public void Play()
@@ -44,10 +51,11 @@ namespace WhatMP4Converter
             FFmpegInfoTask task = new FFmpegInfoTask(
                 this.conf,
                 Guid.NewGuid().ToString());
-            task.SrcFilePath = this.srcFilePath;
+            task.SrcFilePath = this.SrcFilePath;
             task.Execute();
 
-            tbToMinute.Text = task.Duration.Value.TotalMinutes.ToString("00");
+            tbToMinute.Text = (task.Duration.Value.Hours * 60 + 
+                task.Duration.Value.Minutes).ToString("00");
             tbToSecond.Text = task.Duration.Value.Seconds.ToString("00");
             tbToMillSecond.Text = task.Duration.Value.Milliseconds.ToString().PadLeft(3, '0');
         }
@@ -431,19 +439,19 @@ namespace WhatMP4Converter
         {
             axWindowsMediaPlayer1.Ctlcontrols.stop();
             FFmpegCutTask task = new FFmpegCutTask(this.conf, "test");
-            task.SrcFilePath = this.srcFilePath;
+            task.SrcFilePath = this.SrcFilePath;
             string temp = Helper.GetRelativePath("temp");
             if (Directory.Exists(temp) == false)
             {
                 Directory.CreateDirectory(temp);
             }
-            task.DestFilePath = Path.Combine(temp, Path.GetFileName(this.srcFilePath));
+            task.DestFilePath = Path.Combine(temp, Path.GetFileName(this.SrcFilePath));
             task.IsPreview = true;
             task.StartTime = GetStartTime();
             task.ToTime = GetToTime();
-            if ((task.ToTime - task.StartTime).TotalSeconds > 4)
+            if ((task.ToTime - task.StartTime).TotalSeconds > 5)
             {
-                task.ToTime = task.StartTime.Add(TimeSpan.FromSeconds(4));
+                task.ToTime = task.StartTime.Add(TimeSpan.FromSeconds(5));
             }
             task.Execute();
             //axWindowsMediaPlayer1.URL = task.DestFilePath;
@@ -456,23 +464,24 @@ namespace WhatMP4Converter
         {
             axWindowsMediaPlayer1.Ctlcontrols.stop();
             FFmpegCutTask task = new FFmpegCutTask(this.conf, "test");
-            task.SrcFilePath = this.srcFilePath;
+            task.SrcFilePath = this.SrcFilePath;
             string temp = Helper.GetRelativePath("temp");
             if (Directory.Exists(temp) == false)
             {
                 Directory.CreateDirectory(temp);
             }
-            task.DestFilePath = Path.Combine(temp, Path.GetFileName(this.srcFilePath));
+            task.DestFilePath = Path.Combine(temp, Path.GetFileName(this.SrcFilePath));
             task.IsPreview = true;
             task.StartTime = GetStartTime();
             task.ToTime = GetToTime();
-            if ((task.ToTime - task.StartTime).TotalSeconds >4)
+            if ((task.ToTime - task.StartTime).TotalSeconds > 5)
             {
-                task.StartTime = task.ToTime.Subtract(TimeSpan.FromSeconds(4));
+                task.StartTime = task.ToTime.Subtract(TimeSpan.FromSeconds(5));
             }
             task.Execute();
             //axWindowsMediaPlayer1.URL = task.DestFilePath;
             axWindowsMediaPlayer1.URL = task.DestFilePath;
+            axWindowsMediaPlayer1.Ctlcontrols.currentPosition = 3;
             //@"t:\01.mp4";
             axWindowsMediaPlayer1.Ctlcontrols.play();
         }
@@ -514,6 +523,9 @@ namespace WhatMP4Converter
 
         private void BtnConfirm_Click(object sender, EventArgs e)
         {
+            this.StartTime = GetStartTime();
+            this.TotTime = GetToTime();
+            this.Result = true;
             this.Close();
         }
     }

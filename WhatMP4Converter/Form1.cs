@@ -14,6 +14,7 @@ namespace WhatMP4Converter
     {
         public class LiveViewColumns
         {
+            public static int State = 1;
             public static int TaskId = 3;
             public static int Mode = 4;
             public static int InTask = 5;
@@ -326,6 +327,23 @@ namespace WhatMP4Converter
                         this.currentTask = null;
                     });
                 }
+                else if (mode == OperatingMode.Cut)
+                {
+                    List<string> inputFiles = new List<string>();
+                    foreach (ListViewItem item in this.listView1.Items)
+                    {
+                        string itemTaskId = item.SubItems[LiveViewColumns.TaskId].Text;
+                        if (itemTaskId != theTaskId)
+                        {
+                            continue;
+                        }
+                        string filePath = item.SubItems[2].Text;
+                        inputFiles.Add(filePath);
+                        item.SubItems[LiveViewColumns.InTask].Text = "1";
+                        item.SubItems[LiveViewColumns.State].Text = "設定";
+                        ShowCutPreviewform(theTaskId, filePath);
+                    }
+                }
             }
             finally
             {
@@ -412,7 +430,7 @@ namespace WhatMP4Converter
                     && ext != ".mpeg"
                     && ext != ".avi")
                 {
-                    MessageBox.Show("此格式不支援");
+                    MessageBox.Show(ext +" 格式不支援");
                     return;
                 }
                 if (this.Mode == OperatingMode.Merge
@@ -420,6 +438,18 @@ namespace WhatMP4Converter
                 {
                     MessageBox.Show("合併模式只支援MP4");
                     return;
+                }
+                if (this.Mode == OperatingMode.Cut                    )
+                {
+                    if (ext != ".mp4")
+                    {
+                        MessageBox.Show("栽切模式只支援MP4");
+                        return;
+                    }
+                    if (files.Count > 1)
+                    {
+                        MessageBox.Show("栽切模式一次只處理一個影片檔");
+                    }
                 }
                 this.listView1.Items.Add(
                     new ListViewItem(new string[] {
@@ -555,12 +585,30 @@ namespace WhatMP4Converter
             }
         }
 
-        private void Button1_Click(object sender, EventArgs e)
+        private void ShowCutPreviewform(string taskId, string srcFilePath)
         {
+            //string temp = Path.GetFullPath("./");
             FormCutPreview previewForm = new FormCutPreview();
             previewForm.conf = this.conf;
+            previewForm.Text = Path.GetFileName(srcFilePath);
+            previewForm.SrcFilePath = srcFilePath;
             previewForm.ShowDialog();
+            //MessageBox.Show(previewForm.TotTime.ToString());
+
+            FFmpegCutTask task = new FFmpegCutTask(this.conf, taskId);
+            task.StartTime = previewForm.StartTime;
+            task.ToTime = previewForm.TotTime;
+            task.SrcFilePath = srcFilePath;
+            string renameToMP4 = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";             
+            task.DestFilePath = Path.Combine(conf.Output, renameToMP4);
+            task.IsPreview = false;
+            task.Execute();
+
+
+
             previewForm.Dispose();
         }
+
+
     }
 }

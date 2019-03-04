@@ -29,6 +29,7 @@ namespace WhatMP4Converter.Core
     {
         None = -1,
         Convert = 0,
-        Merge = 1
+        Merge = 1,
+        Cut = 2
     }
 }

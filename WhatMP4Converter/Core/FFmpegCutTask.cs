@@ -39,7 +39,7 @@ namespace WhatMP4Converter.Core
             this.Result = DoInfo();
             if (this.Result)
             {
-                this.Result = DoPreview(this.IsPreview);
+                this.Result = DoPreview();
             }
         }
 
@@ -60,35 +60,35 @@ namespace WhatMP4Converter.Core
             return true;
         }
 
-        private bool DoPreview(bool isPrview)
+        private bool DoPreview()
         {
             bool result = true;
             DateTime startTime = DateTime.Now;
             proc = new Process();
             string defaultVideoEncodeParam = GetDefaultVideoEncodeParam(Quality);
-            string previewVideoEncodeParam = GetPreviewVideoEncodeParam(Quality);
 
-            string audioParam;
-            if (this.AudioEncodeType.Equals("aac", StringComparison.OrdinalIgnoreCase))
-            {
-                audioParam = "-c:a copy";
-            }
-            else
-            {
-                audioParam = "-c:a aac -b:a 128k -ac 2";
-            }
-            string videoParam;
-            if (this.VideoEncodeType.Equals("h264", StringComparison.OrdinalIgnoreCase))
-            {
-                videoParam = "-c:v copy";
-            }
-            else if (IsPreview)
-            {
-                videoParam = previewVideoEncodeParam;
-            } else
-            {
-                videoParam = defaultVideoEncodeParam;
-            }
+                string audioParam;
+                if (this.AudioEncodeType.Equals("aac", StringComparison.OrdinalIgnoreCase))
+                {
+                    audioParam = "-c:a copy";
+                    //audioParam = "-c:a aac -b:a 128k -ac 2";
+                }
+                else
+                {
+                    audioParam = "-c:a aac -b:a 128k -ac 2";
+                }
+                string videoParam;
+                if (this.VideoEncodeType.Equals("h264", StringComparison.OrdinalIgnoreCase))
+                {
+                    videoParam = "-c:v copy";
+                    //videoParam = defaultVideoEncodeParam;
+                }
+                else
+                {
+                    videoParam = defaultVideoEncodeParam;
+                }
+
+            //https://stackoverflow.com/questions/14005110/how-to-split-a-video-using-ffmpeg-so-that-each-chunk-starts-with-a-key-frame/33188399#33188399
             string startToParam = string.Format("-ss {0:00}:{1:00}:{2:00}.{3:000} -to {4:00}:{5:00}:{6:00}.{7:000}",
                 this.StartTime.Hours,
                 this.StartTime.Minutes,
@@ -214,49 +214,6 @@ namespace WhatMP4Converter.Core
                 return false;
             }
             return true;
-        }
-
-        private string GetDefaultVideoEncodeParam(FFmpegQuality quality)
-        {
-            if (this.IsPreview)
-            {
-                return "-c:v libx264 -crf 27 -preset ultrafast";
-            }
-            //版本2
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append("-c:v libx264 -crf ");
-                if (quality == FFmpegQuality.High)
-                {
-                    sb.Append(conf.Quality.High.Crf);
-                    sb.Append(" -preset ");
-                    sb.Append(conf.Quality.High.Preset.ToString());
-                }
-                else if (quality == FFmpegQuality.Standard)
-                {
-                    sb.Append(conf.Quality.Standard.Crf);
-                    sb.Append(" -preset ");
-                    sb.Append(conf.Quality.Standard.Preset.ToString());
-                }
-                else if (quality == FFmpegQuality.Low)
-                {
-                    sb.Append(conf.Quality.Low.Crf);
-                    sb.Append(" -preset ");
-                    sb.Append(conf.Quality.Low.Preset.ToString());
-                }
-
-                return sb.ToString();
-            }
-
-            ////版本 1
-            //{
-            //    return "-c:v libx264 -crf 18 -preset veryslow";
-            //}
-        }
-
-        private string GetPreviewVideoEncodeParam(FFmpegQuality quality)
-        {
-            return "-c:v libx264 -crf 27 -preset ultrafast";
         }
     }
 }

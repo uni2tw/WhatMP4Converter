@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace WhatMP4Converter.Core
@@ -77,6 +78,40 @@ namespace WhatMP4Converter.Core
             }
         }
 
+        protected string GetDefaultVideoEncodeParam(FFmpegQuality quality)
+        {
+            //版本2
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("-c:v libx264 -crf ");
+                if (quality == FFmpegQuality.High)
+                {
+                    sb.Append(conf.Quality.High.Crf);
+                    sb.Append(" -preset ");
+                    sb.Append(conf.Quality.High.Preset.ToString());
+                }
+                else if (quality == FFmpegQuality.Standard)
+                {
+                    sb.Append(conf.Quality.Standard.Crf);
+                    sb.Append(" -preset ");
+                    sb.Append(conf.Quality.Standard.Preset.ToString());
+                }
+                else if (quality == FFmpegQuality.Low)
+                {
+                    sb.Append(conf.Quality.Low.Crf);
+                    sb.Append(" -preset ");
+                    sb.Append(conf.Quality.Low.Preset.ToString());
+                }
+
+                return sb.ToString();
+            }
+
+            ////版本 1
+            //{
+            //    return "-c:v libx264 -crf 18 -preset veryslow";
+            //}
+        }
+
         public static Process CreateProc(string ffmpegPath)
         {
             Process proc = new Process();
@@ -92,5 +127,6 @@ namespace WhatMP4Converter.Core
             proc.StartInfo.RedirectStandardOutput = true;
             return proc;
         }
+
     }
 }
