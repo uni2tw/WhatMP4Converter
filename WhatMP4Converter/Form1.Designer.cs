@@ -31,6 +31,8 @@
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.listView1 = new System.Windows.Forms.ListView();
+            this.contextMenuStripFileTree = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.cmiOpenFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -53,6 +55,7 @@
             this.menuItemSwitchLog = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemQuit = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
+            this.contextMenuStripFileTree.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -85,8 +88,23 @@
             this.listView1.Size = new System.Drawing.Size(622, 175);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.ListView1_ItemSelectionChanged);
             this.listView1.DragDrop += new System.Windows.Forms.DragEventHandler(this.listView1_DragDrop);
             this.listView1.DragEnter += new System.Windows.Forms.DragEventHandler(this.listView1_DragEnter);
+            // 
+            // contextMenuStripFileTree
+            // 
+            this.contextMenuStripFileTree.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cmiOpenFolder});
+            this.contextMenuStripFileTree.Name = "CMenuFileTree";
+            this.contextMenuStripFileTree.Size = new System.Drawing.Size(119, 26);
+            // 
+            // cmiOpenFolder
+            // 
+            this.cmiOpenFolder.Name = "cmiOpenFolder";
+            this.cmiOpenFolder.Size = new System.Drawing.Size(118, 22);
+            this.cmiOpenFolder.Text = "開啟目錄";
+            this.cmiOpenFolder.Click += new System.EventHandler(this.CmiOpenFolder_Click);
             // 
             // panel1
             // 
@@ -329,6 +347,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormMain_KeyDown);
             this.groupBox1.ResumeLayout(false);
+            this.contextMenuStripFileTree.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
@@ -370,6 +389,8 @@
         private System.Windows.Forms.ComboBox cbGainFontSize;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox cbShrinkWidth;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripFileTree;
+        private System.Windows.Forms.ToolStripMenuItem cmiOpenFolder;
     }
 }
 

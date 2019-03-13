@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -628,6 +629,27 @@ namespace WhatMP4Converter
             previewForm.Dispose();
         }
 
+        private void CmiOpenFolder_Click(object sender, EventArgs e)
+        {
+            var item = listView1.SelectedItems[0];
+            Process.Start(new ProcessStartInfo
+            {
+                 FileName = "explorer",
+                 WorkingDirectory = conf.Output,
+                 Arguments = "/select," + item.Text
+            });
+        }
 
+        private void ListView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 0)
+            {
+                listView1.ContextMenuStrip = null;
+            }
+            else
+            {
+                listView1.ContextMenuStrip = contextMenuStripFileTree;
+            }
+        }
     }
 }
