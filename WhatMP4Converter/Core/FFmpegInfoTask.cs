@@ -35,13 +35,14 @@ namespace WhatMP4Converter.Core
             this.Result = DoInfo();
         }
 
-        protected override bool PreCheck()
+        public override PreCheckResult PreCheck(out string confirmMessage)
         {
+            confirmMessage = string.Empty;
             if (File.Exists(this.SrcFilePath)== false)
             {
-                return false;
+                return PreCheckResult.Fail;
             }
-            return true;
+            return PreCheckResult.OK;
         }
 
         private bool DoInfo()
@@ -50,7 +51,7 @@ namespace WhatMP4Converter.Core
             string argument = string.Format(" -i \"{0}\" -hide_banner",
                             SrcFilePath);
             WriteLog("ffmpeg.exe " + argument, LogLevel.Info);
-            proc = FFmpegTaskBase.CreateProc(conf.FFmpeg.Path);
+            proc = FFmpegTaskBase.CreateProc();
             proc.StartInfo.Arguments = argument;
             proc.Start();
             proc.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) {

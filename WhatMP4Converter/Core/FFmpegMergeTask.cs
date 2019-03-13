@@ -56,7 +56,7 @@ namespace WhatMP4Converter.Core
         private void DoMerge()
         {
             //create merged file list
-            proc = FFmpegMergeTask.CreateProc(conf.FFmpeg.Path);
+            proc = FFmpegMergeTask.CreateProc();
             string argument = string.Format("-y -f concat -safe 0 -i {0} -c copy {1}",
                             this.SrcFilePath, this.DestFilePath);
             WriteLog("ffmpeg.exe " + argument, LogLevel.Info);
@@ -106,14 +106,15 @@ namespace WhatMP4Converter.Core
             proc.WaitForExit();
         }
 
-        protected override bool PreCheck()
+        public override PreCheckResult PreCheck(out string confirmMessage)
         {
+            confirmMessage = string.Empty;
             if (InputFiles == null || InputFiles.Count == 0)
             {
-                return false;
+                return PreCheckResult.Fail;
             }
 
-            return true;
+            return PreCheckResult.OK;
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -18,6 +19,10 @@ namespace WhatMP4Converter.Core
         public string AudioEncodeType { get; set; }
 
         public string AssFilePath { get; set; }
+
+        public FFmpegShrinkWidth ShrinkLimitWidth { get; set; }
+
+        public int GainFontSize { get; set; }
 
         private Regex regexDuration = new Regex(@"Duration: ([\d:.]*),",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
@@ -42,6 +47,7 @@ namespace WhatMP4Converter.Core
 
         public FFmpegConvertTask(AppConf conf, string taskId) : base(conf, taskId)
         {
+            this.ShrinkLimitWidth = FFmpegShrinkWidth.HD;
         }
 
         protected override void DoExecute()
@@ -93,13 +99,16 @@ namespace WhatMP4Converter.Core
             if (string.IsNullOrEmpty(this.AssFilePath) == false && File.Exists(this.AssFilePath))
             {
                 string assFileName = Path.GetFileName(this.AssFilePath);
-                File.Copy(this.AssFilePath, Helper.GetRelativePath(assFileName), true);
+                string assText = File.ReadAllText(this.AssFilePath, Encoding.UTF8);
+                assText = Helper.ChangeAssFontSize(assText, this.GainFontSize);
+                File.WriteAllText(Helper.GetRelativePath(assFileName), assText);
+                //File.Copy(this.AssFilePath, Helper.GetRelativePath(assFileName), true);
                 filters.Add(string.Format("subtitles='{0}'", assFileName));
             }
 
+            int limitWidth = GetShrinkWidth(ShrinkLimitWidth);
             int videoWidth;
-            if (conf.Shrink != null && conf.Shrink.Auto && conf.Shrink.Width > 0 &&
-                int.TryParse(this.VideoWidth, out videoWidth) && videoWidth > conf.Shrink.Width)
+            if (limitWidth > 0 && int.TryParse(this.VideoWidth, out videoWidth) && videoWidth > limitWidth)
             {
                 filters.Add(string.Format("scale={0}:-1", conf.Shrink.Width));
             }
@@ -136,7 +145,7 @@ namespace WhatMP4Converter.Core
                             threadsParam,
                             DestFilePath);
             WriteLog("ffmpeg.exe " + argument, LogLevel.Info);
-            proc = FFmpegTaskBase.CreateProc(conf.FFmpeg.Path);
+            proc = FFmpegTaskBase.CreateProc();
             proc.StartInfo.Arguments = argument;
             proc.Start();
             proc.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) {
@@ -195,7 +204,7 @@ namespace WhatMP4Converter.Core
             string argument = string.Format(" -i \"{0}\" -hide_banner",
                             SrcFilePath);
             WriteLog("ffmpeg.exe " + argument, LogLevel.Info);
-            proc = FFmpegTaskBase.CreateProc(conf.FFmpeg.Path);
+            proc = FFmpegTaskBase.CreateProc();
             proc.StartInfo.Arguments = argument;
             proc.Start();
             proc.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) {
@@ -247,13 +256,39 @@ namespace WhatMP4Converter.Core
             return result;
         }
 
-        protected override bool PreCheck()
+        public override PreCheckResult PreCheck(out string confirmMessage)
         {
+            confirmMessage = string.Empty;
             if (File.Exists(this.SrcFilePath) == false)
             {
-                return false;
+                return PreCheckResult.Fail;
             }
-            return true;
+
+            string ext = Path.GetExtension(this.SrcFilePath);
+            string assFilePath = null;
+            List<string> assFilePaths;
+            if (Helper.TryFindAssFile(this.SrcFilePath, out assFilePath, out assFilePaths))
+            {
+                List<string> assFonts = Helper.GetAssFontStyles(new FileInfo(assFilePath));
+                Dictionary<string, string> systemFonts = Helper.GetChineseFonts();
+
+                var missingFonds = new HashSet<String>(assFonts).Except(systemFonts.Keys).ToList();
+                
+                if (missingFonds.Count > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("系統找不到字型");
+                    foreach (string missingFont in missingFonds) {
+                        sb.AppendLine(missingFont);
+                    }
+                    confirmMessage = sb.ToString();
+                    return PreCheckResult.MissingFontAtAss;
+                }
+
+            }
+
+
+            return PreCheckResult.OK;
         }
 
     }

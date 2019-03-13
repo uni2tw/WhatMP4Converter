@@ -32,4 +32,19 @@ namespace WhatMP4Converter.Core
         Merge = 1,
         Cut = 2
     }
+
+    public enum FFmpegShrinkWidth
+    {
+        None = 0,
+        FullHD = 1,
+        HD = 2,
+        Low = 3,
+    }
+
+    public enum PreCheckResult
+    {
+        Fail,
+        OK,
+        MissingFontAtAss,        
+    }
 }

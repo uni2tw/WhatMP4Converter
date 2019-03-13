@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace WhatMP4Converter.Core
 {
@@ -109,6 +113,124 @@ namespace WhatMP4Converter.Core
             }
 
             return false;
+        }
+
+        static Regex regexFontStyle = new Regex(@"Style: [^,]+,([^,]+),([^,]+),[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[\d]+");
+
+        public static string ChangeAssFontSize(string text, int incrSize = 10)
+        {            
+            MatchCollection matches = regexFontStyle.Matches(text);
+            for (int i = matches.Count - 1; i >= 0; i--)
+            {
+                Match match = matches[i];
+                Group group = match.Groups[2];
+                string replacement = (int.Parse(group.Value) + incrSize).ToString();
+                text = ReplaceStrByPos(text, group.Index, group.Length, replacement);
+            }
+            return text;
+        }
+
+        private static string ReplaceStrByPos(string text, int index, int length, string replacement)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(text.Substring(0, index));
+            builder.Append(replacement);
+            builder.Append(text.Substring(index + length));
+            return builder.ToString();
+        }
+        /// <summary>
+        /// 取得 有 ass 字幕檔目錄下，所有字幕檔使用的字型
+        /// </summary>
+        /// <param name="dirInfo"></param>
+        /// <param name="searchPattern"></param>
+        /// <returns></returns>
+        public static List<string> GetAssFontStyles(DirectoryInfo dirInfo, string searchPattern = "*.ass")
+        {
+            var result = new List<string>();
+            foreach (var fi in dirInfo.GetFiles(searchPattern))
+            {
+                result.AddRange(GetAssFontStyles(fi));
+            }
+            return result.Distinct().ToList();
+        }
+
+        public static List<string> GetAssFontStyles(FileInfo fi)
+        {
+            var result = new List<string>();
+            string text = File.ReadAllText(fi.FullName);
+            MatchCollection matches = regexFontStyle.Matches(text);
+            foreach (Match match in matches)
+            {
+                if (match.Success)
+                {
+                    result.Add(match.Groups[1].Value.TrimStart('@'));
+                }
+            }
+            return result.Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 取得系統安裝的中文或日文字型
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<string, string> GetChineseFonts()
+        {
+            Dictionary<string, string> installedChineseFonts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            InstalledFontCollection installedFontCollection = new InstalledFontCollection();
+            CultureInfo[] cultureInfoArray = new CultureInfo[5]
+               {
+                  new CultureInfo("en-US"),
+                  new CultureInfo("ja-JP"),
+                  new CultureInfo("zh-TW"),
+                  new CultureInfo("zh-CN"),
+                  new CultureInfo("zh-HK")
+               };
+            foreach (System.Drawing.FontFamily family in installedFontCollection.Families)
+            {
+                if (family.Name == "")
+                {
+                    continue;
+                }
+
+                if (family.Name.StartsWith("EPSON "))
+                {
+                    string name = family.GetName(cultureInfoArray[1].LCID);
+
+                    installedChineseFonts[name] = name;
+                }
+                else
+                {
+                    string fontDescription = (string)null;
+
+                    for (int index = 0; index < cultureInfoArray.Length; ++index)
+                    {
+                        string cultureFontName = family.GetName(cultureInfoArray[index].LCID);
+                        //if (cultureFontName.Any(ch => Char.GetUnicodeCategory(ch) == UnicodeCategory.OtherLetter) == false)
+                        //{
+                        //    continue;
+                        //}
+                        if (family.Name == cultureFontName && installedChineseFonts.ContainsKey(family.Name) == false)
+                        {
+                            installedChineseFonts.Add(family.Name, family.Name);
+                        }
+                        else if (family.Name != cultureFontName)
+                        {
+                            if (family.Name.Length == 0)
+                            {
+                                fontDescription = cultureFontName;
+                            }
+                            else
+                            {
+                                fontDescription = family.Name + " <" + cultureFontName + ">";
+                            }
+                            installedChineseFonts[cultureFontName] = fontDescription;
+                        }
+                    }
+
+                }
+            }
+            return installedChineseFonts;
         }
     }
 }

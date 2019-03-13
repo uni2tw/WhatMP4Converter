@@ -34,12 +34,13 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.lbFFmpegPath = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.lbOutputPath = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabConvertPage = new System.Windows.Forms.TabPage();
+            this.cbShrinkWidth = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cbGainFontSize = new System.Windows.Forms.ComboBox();
             this.cbCrf = new System.Windows.Forms.ComboBox();
             this.chkRun = new System.Windows.Forms.CheckBox();
             this.tabMergePage = new System.Windows.Forms.TabPage();
@@ -93,7 +94,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 214);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(632, 79);
+            this.panel1.Size = new System.Drawing.Size(632, 104);
             this.panel1.TabIndex = 3;
             // 
             // panel2
@@ -103,48 +104,26 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel2.Location = new System.Drawing.Point(0, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(632, 76);
+            this.panel2.Size = new System.Drawing.Size(632, 101);
             this.panel2.TabIndex = 9;
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.lbFFmpegPath);
-            this.groupBox2.Controls.Add(this.label1);
             this.groupBox2.Controls.Add(this.lbOutputPath);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Location = new System.Drawing.Point(0, 0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(301, 76);
+            this.groupBox2.Size = new System.Drawing.Size(308, 101);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "設定";
-            // 
-            // lbFFmpegPath
-            // 
-            this.lbFFmpegPath.AutoSize = true;
-            this.lbFFmpegPath.ForeColor = System.Drawing.Color.OrangeRed;
-            this.lbFFmpegPath.Location = new System.Drawing.Point(91, 46);
-            this.lbFFmpegPath.Name = "lbFFmpegPath";
-            this.lbFFmpegPath.Size = new System.Drawing.Size(41, 12);
-            this.lbFFmpegPath.TabIndex = 16;
-            this.lbFFmpegPath.Text = "未設定";
-            this.lbFFmpegPath.Click += new System.EventHandler(this.lbFFmpegPath_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 46);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(73, 12);
-            this.label1.TabIndex = 15;
-            this.label1.Text = "FFmpeg路徑: ";
             // 
             // lbOutputPath
             // 
             this.lbOutputPath.AutoSize = true;
             this.lbOutputPath.ForeColor = System.Drawing.Color.OrangeRed;
-            this.lbOutputPath.Location = new System.Drawing.Point(79, 24);
+            this.lbOutputPath.Location = new System.Drawing.Point(79, 31);
             this.lbOutputPath.Name = "lbOutputPath";
             this.lbOutputPath.Size = new System.Drawing.Size(41, 12);
             this.lbOutputPath.TabIndex = 14;
@@ -154,7 +133,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(14, 24);
+            this.label2.Location = new System.Drawing.Point(14, 31);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 12);
             this.label2.TabIndex = 13;
@@ -167,35 +146,81 @@
             this.tabControl1.Controls.Add(this.tabMergePage);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tabControl1.Location = new System.Drawing.Point(301, 0);
+            this.tabControl1.Location = new System.Drawing.Point(308, 0);
             this.tabControl1.Multiline = true;
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(331, 76);
+            this.tabControl1.Size = new System.Drawing.Size(324, 101);
             this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tabControl1.TabIndex = 15;
             // 
             // tabConvertPage
             // 
+            this.tabConvertPage.Controls.Add(this.cbShrinkWidth);
+            this.tabConvertPage.Controls.Add(this.label3);
+            this.tabConvertPage.Controls.Add(this.cbGainFontSize);
             this.tabConvertPage.Controls.Add(this.cbCrf);
             this.tabConvertPage.Controls.Add(this.chkRun);
             this.tabConvertPage.Location = new System.Drawing.Point(4, 25);
             this.tabConvertPage.Name = "tabConvertPage";
             this.tabConvertPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tabConvertPage.Size = new System.Drawing.Size(323, 47);
+            this.tabConvertPage.Size = new System.Drawing.Size(316, 72);
             this.tabConvertPage.TabIndex = 0;
             this.tabConvertPage.Text = "轉換";
             this.tabConvertPage.UseVisualStyleBackColor = true;
             // 
+            // cbShrinkWidth
+            // 
+            this.cbShrinkWidth.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cbShrinkWidth.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cbShrinkWidth.FormattingEnabled = true;
+            this.cbShrinkWidth.Items.AddRange(new object[] {
+            "最大寬度: 不指定",
+            "最大寬度: 1920",
+            "最大寬度: 1280",
+            "最大寬度: 720"});
+            this.cbShrinkWidth.Location = new System.Drawing.Point(6, 40);
+            this.cbShrinkWidth.Margin = new System.Windows.Forms.Padding(3, 8, 3, 3);
+            this.cbShrinkWidth.Name = "cbShrinkWidth";
+            this.cbShrinkWidth.Size = new System.Drawing.Size(103, 20);
+            this.cbShrinkWidth.TabIndex = 19;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(133, 15);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(29, 12);
+            this.label3.TabIndex = 18;
+            this.label3.Text = "字型";
+            // 
+            // cbGainFontSize
+            // 
+            this.cbGainFontSize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cbGainFontSize.FormattingEnabled = true;
+            this.cbGainFontSize.Items.AddRange(new object[] {
+            "-10",
+            "-5",
+            "+0",
+            "+5",
+            "+10",
+            "+15",
+            "+20"});
+            this.cbGainFontSize.Location = new System.Drawing.Point(168, 11);
+            this.cbGainFontSize.Name = "cbGainFontSize";
+            this.cbGainFontSize.Size = new System.Drawing.Size(48, 20);
+            this.cbGainFontSize.TabIndex = 17;
+            // 
             // cbCrf
             // 
             this.cbCrf.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.cbCrf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cbCrf.FormattingEnabled = true;
             this.cbCrf.Items.AddRange(new object[] {
             "壓縮畫質: 好",
             "壓縮畫質: 標準",
             "壓縮畫質: 差"});
-            this.cbCrf.Location = new System.Drawing.Point(6, 11);
+            this.cbCrf.Location = new System.Drawing.Point(6, 9);
             this.cbCrf.Margin = new System.Windows.Forms.Padding(3, 8, 3, 3);
             this.cbCrf.Name = "cbCrf";
             this.cbCrf.Size = new System.Drawing.Size(103, 20);
@@ -204,7 +229,7 @@
             // chkRun
             // 
             this.chkRun.AutoSize = true;
-            this.chkRun.Location = new System.Drawing.Point(127, 13);
+            this.chkRun.Location = new System.Drawing.Point(236, 13);
             this.chkRun.Name = "chkRun";
             this.chkRun.Size = new System.Drawing.Size(72, 16);
             this.chkRun.TabIndex = 13;
@@ -217,7 +242,7 @@
             this.tabMergePage.Location = new System.Drawing.Point(4, 25);
             this.tabMergePage.Name = "tabMergePage";
             this.tabMergePage.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMergePage.Size = new System.Drawing.Size(323, 47);
+            this.tabMergePage.Size = new System.Drawing.Size(316, 72);
             this.tabMergePage.TabIndex = 1;
             this.tabMergePage.Text = "合併";
             this.tabMergePage.UseVisualStyleBackColor = true;
@@ -236,7 +261,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(323, 47);
+            this.tabPage1.Size = new System.Drawing.Size(316, 72);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "裁切";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -289,7 +314,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(632, 293);
+            this.ClientSize = new System.Drawing.Size(632, 318);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.menuStrip1);
@@ -338,12 +363,13 @@
         private System.Windows.Forms.CheckBox chkRun;
         private System.Windows.Forms.TabPage tabMergePage;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label lbFFmpegPath;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lbOutputPath;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lbMergeModeMessage;
         private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.ComboBox cbGainFontSize;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox cbShrinkWidth;
     }
 }
 

@@ -279,13 +279,11 @@ namespace WhatMP4Converter.Core
         public string Output { get; set; }
         [ConfProp(2)]
         public ThreadsConfig Threads { get; set; }
-        [ConfProp(3)]
-        public FFmpegConfig FFmpeg { get; set; }
-        [ConfProp(6)]
-        public StringsConfig Strings { get; set; }
         [ConfProp(5)]
-        public ShrinkConfig Shrink { get; set; }
+        public StringsConfig Strings { get; set; }
         [ConfProp(4)]
+        public ShrinkConfig Shrink { get; set; }
+        [ConfProp(3)]
         public QualitySection Quality { get; set; }
 
         public static AppConf Reload()
@@ -304,10 +302,6 @@ namespace WhatMP4Converter.Core
             File.WriteAllText(confPath, str);
         }
 
-    }
-    public class FFmpegConfig
-    {
-        public string Path { get; set; }
     }
 
     public class StringsConfig {

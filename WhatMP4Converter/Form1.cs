@@ -31,7 +31,7 @@ namespace WhatMP4Converter
         private void MyInitForm()
         {
             this.Width = 640;
-            this.Height = 320;
+            this.Height = 345;
             //this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.Text = "MP4 轉檔工具";
             this.listView1.View = View.Details;
@@ -57,23 +57,27 @@ namespace WhatMP4Converter
             this.timer1.Interval = 1000;
             this.timer1.Tick += Timer1_Tick;            
 
-            //Config.FFmpegPath = this.lbFFmpegPath.Text = @"C:\tools\ffmpeg2\bin\";
             Console.WriteLine("form start.");
 
             conf = AppConf.Reload();
             chkRun.Checked = conf.Auto;
             this.lbOutputPath.Text = conf.Output;
-            this.lbFFmpegPath.Text = conf.FFmpeg.Path;
-            if (string.IsNullOrEmpty(this.lbFFmpegPath.Text) || Directory.Exists(this.lbFFmpegPath.Text) == false)
-            {
-                this.lbFFmpegPath.Text = conf.Strings.Undefined;
-            }
+
             if (string.IsNullOrEmpty(this.lbOutputPath.Text) || Directory.Exists(this.lbOutputPath.Text) == false)
             {
                 this.lbOutputPath.Text = "同目錄";
             }
             this.timer1.Enabled = this.chkRun.Checked;
 
+            InitComboBoxs();        
+
+            InitLogBox();
+
+            InitResource();
+        }
+
+        private void InitComboBoxs()
+        {
             if (conf.Quality.Default.Equals("standard", StringComparison.OrdinalIgnoreCase))
             {
                 cbCrf.SelectedIndex = 1;
@@ -87,7 +91,34 @@ namespace WhatMP4Converter
                 cbCrf.SelectedIndex = 2;
             }
 
-            InitLogBox();
+            if (conf.Shrink.Width == 1920)
+            {
+                cbShrinkWidth.SelectedIndex = 1;
+            }
+            else if (conf.Shrink.Width == 1280)
+            {
+                cbShrinkWidth.SelectedIndex = 2;
+            }
+            else if (conf.Shrink.Width == 720)
+            {
+                cbShrinkWidth.SelectedIndex = 3;
+            }
+            else
+            {
+                cbShrinkWidth.SelectedIndex = 0;
+            }
+
+
+            cbGainFontSize.DisplayMember = "Text";
+            cbGainFontSize.Items.Clear();
+            cbGainFontSize.Items.Add(new GainFontSizeDataItem { Text = "-10", Value = -10 });
+            cbGainFontSize.Items.Add(new GainFontSizeDataItem { Text = "-5", Value = -5 });
+            cbGainFontSize.Items.Add(new GainFontSizeDataItem { Text = "0", Value = 0 });
+            cbGainFontSize.Items.Add(new GainFontSizeDataItem { Text = "5", Value = 5 });
+            cbGainFontSize.Items.Add(new GainFontSizeDataItem { Text = "10", Value = 10 });
+            cbGainFontSize.Items.Add(new GainFontSizeDataItem { Text = "15", Value = 15 });
+            cbGainFontSize.Items.Add(new GainFontSizeDataItem { Text = "20", Value = 20 });
+            cbGainFontSize.SelectedIndex = 2;
         }
 
         /// <summary>
@@ -95,7 +126,12 @@ namespace WhatMP4Converter
         /// </summary>
         private void InitResource()
         {
-            string ffmpegExePath = Helper.GetRelativePath("ffmpeg.exe");
+            string binPath = Helper.GetRelativePath("bin");
+            if (Directory.Exists(binPath) == false)
+            {
+                Directory.CreateDirectory(binPath);
+            }
+            string ffmpegExePath = Path.Combine(binPath, "ffmpeg.exe");
             if (File.Exists(ffmpegExePath) == false)
             {
                 using (FileStream fs = new FileStream(ffmpegExePath, FileMode.CreateNew, FileAccess.Write))
@@ -192,59 +228,64 @@ namespace WhatMP4Converter
                         break;
                     }
                     FFmpegQuality crf = (FFmpegQuality)cbCrf.SelectedIndex;
-                    var asyncTask = Task.Factory.StartNew(delegate ()
-                    {                        
-                        var task = new FFmpegConvertTask(this.conf, theTaskId);
-                        this.currentTask = task;
-                        task.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress, string taskId)
+                    
+                    FFmpegShrinkWidth shrinkWidth = (FFmpegShrinkWidth)cbShrinkWidth.SelectedIndex;
+                    int gainFontSize = ((GainFontSizeDataItem)cbGainFontSize.SelectedItem).Value;
+                    var convertTask = new FFmpegConvertTask(this.conf, theTaskId);
+                    this.currentTask = convertTask;
+                    convertTask.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress, string taskId)
+                    {
+                        SafeInvoke(listView1, delegate ()
                         {
-                            SafeInvoke(listView1, delegate ()
+                            foreach (ListViewItem item in this.listView1.Items)
                             {
-                                foreach (ListViewItem item in this.listView1.Items)
+                                string itemTsakId = item.SubItems[3].Text;
+                                if (itemTsakId != taskId)
                                 {
-                                    string itemTsakId = item.SubItems[3].Text;
-                                    if (itemTsakId != taskId)
-                                    {
-                                        continue;
-                                    }
-                                    if (isStart)
-                                    {
-                                        item.SubItems[1].Text = "轉換";
-                                    }
-                                    else if (isFinish && isFail == true)
-                                    {
-                                        item.SubItems[1].Text = "完成";
-                                    }
-                                    else if (isFinish && isFail == false)
-                                    {
-                                        item.SubItems[1].Text = "失敗";
-                                    }
-                                    else
-                                    {
-                                        item.SubItems[1].Text = string.Format("{0:0.##\\%}", progress * 100);
-                                    }
+                                    continue;
                                 }
-                            });
-                        };
-                        task.OnLog += delegate (string str, LogLevel level)
+                                if (isStart)
+                                {
+                                    item.SubItems[1].Text = "轉換";
+                                }
+                                else if (isFinish && isFail == true)
+                                {
+                                    item.SubItems[1].Text = "完成";
+                                }
+                                else if (isFinish && isFail == false)
+                                {
+                                    item.SubItems[1].Text = "失敗";
+                                }
+                                else
+                                {
+                                    item.SubItems[1].Text = string.Format("{0:0.##\\%}", progress * 100);
+                                }
+                            }
+                        });
+                    };
+                    convertTask.OnLog += delegate (string str, LogLevel level)
+                    {
+                        SafeInvoke(logBox, delegate ()
                         {
-                            SafeInvoke(logBox, delegate ()
+                            if (level == LogLevel.Debug)
                             {
-                                if (level == LogLevel.Debug)
-                                {
-                                    logBox.AppendText(str + Environment.NewLine);
-                                }
-                                else if (level == LogLevel.Info)
-                                {
-                                    logBox.AppendText(str + Environment.NewLine, Color.Blue);
-                                }
-                            });
+                                logBox.AppendText(str + Environment.NewLine);
+                            }
+                            else if (level == LogLevel.Info)
+                            {
+                                logBox.AppendText(str + Environment.NewLine, Color.Blue);
+                            }
+                        });
 
-                        };
-                        task.SrcFilePath = srcFilePath;
-                        task.DestFilePath = destFlePath;
-                        task.Quality = crf;
-                        task.Execute();
+                    };
+                    convertTask.SrcFilePath = srcFilePath;
+                    convertTask.DestFilePath = destFlePath;
+                    convertTask.Quality = crf;
+                    convertTask.ShrinkLimitWidth = shrinkWidth;
+                    convertTask.GainFontSize = gainFontSize;
+                    var asyncTask = Task.Factory.StartNew(delegate ()
+                    {
+                        convertTask.Execute();
                     });
                     asyncTask.ContinueWith(delegate (Task t)
                     {
@@ -467,30 +508,8 @@ namespace WhatMP4Converter
 
         }
 
-        private void lbFFmpegPath_Click(object sender, EventArgs e)
-        {
-            using (var fbd = new FolderBrowserDialog())
-            {
-                if (Directory.Exists(this.lbFFmpegPath.Text))
-                {
-                    //not working
-                    fbd.RootFolder = Environment.SpecialFolder.MyComputer;
-                    fbd.SelectedPath = this.lbFFmpegPath.Text;
-                }
-                DialogResult result = fbd.ShowDialog();
-                
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-                {
-                    string[] files = Directory.GetFiles(fbd.SelectedPath);
-
-                    lbFFmpegPath.Text = fbd.SelectedPath;
-                }
-            }
-        }
-
         private void FormMain_FormClosed(object sender, FormClosedEventArgs e)
         {
-            conf.FFmpeg.Path = lbFFmpegPath.Text;
             conf.Output = lbOutputPath.Text;
             conf.Auto = chkRun.Checked;
             AppConf.Update(conf);

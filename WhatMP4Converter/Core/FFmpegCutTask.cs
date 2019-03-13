@@ -146,7 +146,7 @@ namespace WhatMP4Converter.Core
                             threadsParam,
                             DestFilePath);
             WriteLog("ffmpeg.exe " + argument, LogLevel.Info);
-            proc = FFmpegTaskBase.CreateProc(conf.FFmpeg.Path);
+            proc = FFmpegTaskBase.CreateProc();
             proc.StartInfo.Arguments = argument;
             proc.Start();
             proc.OutputDataReceived += delegate (object sender, DataReceivedEventArgs e) {
@@ -199,21 +199,22 @@ namespace WhatMP4Converter.Core
             return result;
         }
 
-        protected override bool PreCheck()
+        public override PreCheckResult PreCheck(out string confirmMessage)
         {
+            confirmMessage = string.Empty;
             if (string.IsNullOrEmpty(DestFilePath))
             {
-                return false;
+                return PreCheckResult.Fail;
             }
             if (File.Exists(this.SrcFilePath) == false)
             {
-                return false;
+                return PreCheckResult.Fail;
             }
             if (ToTime == TimeSpan.Zero || StartTime > ToTime)
             {
-                return false;
+                return PreCheckResult.Fail;
             }
-            return true;
+            return PreCheckResult.OK;
         }
     }
 }

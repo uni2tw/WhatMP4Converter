@@ -21,6 +21,8 @@ namespace WhatMP4Converter.Core
 
         public event LogHandler OnLog;
 
+        public PreCheckResult CheckResult { get; set; }
+
         public string SrcFilePath { get; set; }
         public string DestFilePath { get; set; }
 
@@ -28,7 +30,7 @@ namespace WhatMP4Converter.Core
 
         protected abstract void DoExecute();
 
-        protected abstract bool PreCheck();
+        public abstract PreCheckResult PreCheck(out string confirmMessage);
 
         public bool Result { get; set; }
 
@@ -41,8 +43,9 @@ namespace WhatMP4Converter.Core
         public void Execute()
         {
             BroadCastProgress(true, false, null, 0);
-
-            if (PreCheck())
+            string confirmMessage;
+            PreCheckResult checkResult = PreCheck(out confirmMessage);
+            if (checkResult == PreCheckResult.OK)
             {
                 DoExecute();
                 Result = true;
@@ -112,10 +115,11 @@ namespace WhatMP4Converter.Core
             //}
         }
 
-        public static Process CreateProc(string ffmpegPath)
+        public static Process CreateProc()
         {
-            Process proc = new Process();
-            proc.StartInfo.FileName = Path.Combine(ffmpegPath, "ffmpeg.exe");            
+            Process proc = new Process();            
+            proc.StartInfo.FileName =  Path.GetFullPath("./bin/ffmpeg.exe");
+            //proc.StartInfo.FileName = Path.Combine(ffmpegPath, "ffmpeg.exe");            
             if (File.Exists(proc.StartInfo.FileName) == false)
             {
                 return null;
@@ -126,6 +130,23 @@ namespace WhatMP4Converter.Core
             proc.StartInfo.RedirectStandardError = true;
             proc.StartInfo.RedirectStandardOutput = true;
             return proc;
+        }
+
+        protected int GetShrinkWidth(FFmpegShrinkWidth shrinkWidth)
+        {
+            if (shrinkWidth == FFmpegShrinkWidth.FullHD)
+            {
+                return 1920;
+            }
+            if (shrinkWidth == FFmpegShrinkWidth.HD)
+            {
+                return 1280;
+            }
+            if (shrinkWidth == FFmpegShrinkWidth.Low)
+            {
+                return 720;
+            }
+            return -1;
         }
 
     }

@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\AppConf.cs" />
+    <Compile Include="Core\ComboBoxItem.cs" />
     <Compile Include="Core\Enums.cs" />
     <Compile Include="Core\Extensions.cs" />
     <Compile Include="Core\FFmpegCutTask.cs" />
@@ -125,6 +126,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="assets\ffmpeg.exe" />
     <Content Include="Mp4.ico" />
     <Content Include="../readme.md" />
     <Content Include="assets\trayse101-basic-filetypes-1-mp4.ico" />
