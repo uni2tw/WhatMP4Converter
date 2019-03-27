@@ -14,7 +14,7 @@ namespace WhatMP4Converter.Core
 
         public string TaskId { get; private set; }
 
-        public delegate void ProgressHandler(bool isStart, bool isFinish, bool? isFail, double progress, string taskid);
+        public delegate void ProgressHandler(bool isStart, bool isFinish, bool? isFail, double progress, string message, string taskid);
         public event ProgressHandler OnProgress;
 
         public delegate void LogHandler(string str, LogLevel level);
@@ -42,7 +42,7 @@ namespace WhatMP4Converter.Core
 
         public void Execute()
         {
-            BroadCastProgress(true, false, null, 0);
+            BroadCastProgress(true, false, null, 0, null);
             string confirmMessage;
             PreCheckResult checkResult = PreCheck(out confirmMessage);
             if (checkResult == PreCheckResult.OK)
@@ -51,7 +51,7 @@ namespace WhatMP4Converter.Core
                 Result = true;
             }
 
-            BroadCastProgress(false, true, Result, 100);
+            BroadCastProgress(false, true, Result, 100, confirmMessage);
             IsClosed = true;
         }
 
@@ -73,11 +73,11 @@ namespace WhatMP4Converter.Core
             Console.WriteLine(str);
         }
 
-        protected void BroadCastProgress(bool isStart, bool isFinish, bool? isFail, double progress)
+        protected void BroadCastProgress(bool isStart, bool isFinish, bool? isFail, double progress, string message)
         {
             if (OnProgress != null)
             {
-                OnProgress(isStart, isFinish, isFail, progress, this.TaskId);
+                OnProgress(isStart, isFinish, isFail, progress,  message, this.TaskId);
             }
         }
 

@@ -93,7 +93,7 @@ namespace WhatMP4Converter.Core
                         totalFileSize += new FileInfo(inputFile).Length / 1024;
                     }
                     double progress = grandTotalFileSize / (double)totalFileSize;
-                    BroadCastProgress(false, false, null, progress);
+                    BroadCastProgress(false, false, null, progress, null);
                 }
 
                 if (line == "Conversion failed!" || line.Contains("Invalid argument"))

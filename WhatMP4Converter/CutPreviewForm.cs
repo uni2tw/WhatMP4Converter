@@ -6,17 +6,17 @@ using WhatMP4Converter.Core;
 namespace WhatMP4Converter
 {
     //https://stackoverflow.com/questions/17461670/play-video-without-using-media-player-winform
-    public partial class FormCutPreview : Form
+    public partial class CutPreviewForm : Form
     {
         int pointerPos = 1;
         public string SrcFilePath;
         public TimeSpan StartTime { get; set; }
-        public TimeSpan TotTime { get; set; }
+        public TimeSpan endTime { get; set; }
 
         public bool Result { get; set; }
 
         public AppConf conf;
-        public FormCutPreview()
+        public CutPreviewForm()
         {
             InitializeComponent();
 
@@ -43,6 +43,7 @@ namespace WhatMP4Converter
         {
             InitForm();
             RenderPointer();
+            RenderStatus();
         }
 
         private void InitForm()
@@ -53,6 +54,8 @@ namespace WhatMP4Converter
                 Guid.NewGuid().ToString());
             task.SrcFilePath = this.SrcFilePath;
             task.Execute();
+
+            this.endTime = task.Duration.Value;
 
             tbToMinute.Text = (task.Duration.Value.Hours * 60 + 
                 task.Duration.Value.Minutes).ToString("00");
@@ -84,7 +87,7 @@ namespace WhatMP4Converter
 
         }
 
-        private TimeSpan GetToTime()
+        private TimeSpan GetEndTime()
         {
             int totalMinutes = int.Parse(tbToMinute.Text);
             int totalSeconds = int.Parse(tbToSecond.Text);
@@ -158,7 +161,7 @@ namespace WhatMP4Converter
             if (e.KeyCode == Keys.Space)
             {
                 handled = true;
-                if (pointerPos >= 0 && pointerPos <=3)
+                if (pointerPos >= 0 && pointerPos <=2)
                 {
                     btnPreviewStart.PerformClick();
                 } else
@@ -431,8 +434,15 @@ namespace WhatMP4Converter
                 return;
             }
             RenderPointer();
+            RenderStatus();
             //e.Handled = true;
             e.SuppressKeyPress = true;
+        }
+
+        private void RenderStatus()
+        {
+            lbStatus.Text = string.Format("結尾栽掉 {0} 秒",
+                (this.endTime - GetEndTime()  ).TotalSeconds.ToString("00.###"));
         }
 
         private void btnPreviewStart_Click(object sender, EventArgs e)
@@ -448,7 +458,7 @@ namespace WhatMP4Converter
             task.DestFilePath = Path.Combine(temp, Path.GetFileName(this.SrcFilePath));
             task.IsPreview = true;
             task.StartTime = GetStartTime();
-            task.ToTime = GetToTime();
+            task.ToTime = GetEndTime();
             if ((task.ToTime - task.StartTime).TotalSeconds > 5)
             {
                 task.ToTime = task.StartTime.Add(TimeSpan.FromSeconds(5));
@@ -473,7 +483,7 @@ namespace WhatMP4Converter
             task.DestFilePath = Path.Combine(temp, Path.GetFileName(this.SrcFilePath));
             task.IsPreview = true;
             task.StartTime = GetStartTime();
-            task.ToTime = GetToTime();
+            task.ToTime = GetEndTime();
             if ((task.ToTime - task.StartTime).TotalSeconds > 5)
             {
                 task.StartTime = task.ToTime.Subtract(TimeSpan.FromSeconds(5));
@@ -524,7 +534,7 @@ namespace WhatMP4Converter
         private void BtnConfirm_Click(object sender, EventArgs e)
         {
             this.StartTime = GetStartTime();
-            this.TotTime = GetToTime();
+            this.endTime = GetEndTime();
             this.Result = true;
             this.Close();
         }

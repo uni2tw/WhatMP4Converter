@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WhatMP4Converter.Core;
+using WhatMP4Converter.Tests;
 
 namespace WhatMP4Converter
 {
@@ -17,6 +19,12 @@ namespace WhatMP4Converter
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            new ChineseConverterFixture().ToTraditionalTest();
+            
+            //Helper.ConvertAssToTraditionalChinese(
+            //    @"Dialogue: 0,0:01:53.47,0:01:54.35,*Default,NTP,0000,0000,0000,,有什么問題嗎\N{\fn微软雅黑\fs14}There a problem?");
+
             Application.Run(new formMain());
         }
 

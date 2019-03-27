@@ -129,6 +129,52 @@ namespace WhatMP4Converter.Core
             }
             return text;
         }
+        
+        static Regex regexAssDialog = new Regex(@"Dialogue:[ ]*[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,([\w\W]*)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        //適用於中英字幕，分別使用2種字型時
+        //Dialogue: 0,0:01:53.47,0:01:54.35,*Default,NTP,0000,0000,0000,,有什么問題嗎\N{\fn微软雅黑\fs14}There a problem?
+        static Regex regexAssDialog2 = new Regex(@"Dialogue:[ ]*[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,([\w\W]+){[\w\W]*}([\w\W]+)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static string ConvertAssToTraditionalChinese(string assText)
+        {
+            StringBuilder sb = new StringBuilder();
+            string[] lines = assText.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string line in lines)
+            {
+                {
+                    string newLine = line;
+                    bool anyMatch = false;
+                    for (int i = 1; i <= 2; i++)
+                    {
+                        Match match = regexAssDialog2.Match(newLine);
+                        if (match.Success)
+                        {
+                            var group = match.Groups[i];
+                            string replacement = ChineseConverter.ToTraditional(group.Value);                            
+                            newLine = ReplaceStrByPos(newLine, group.Index, group.Length, replacement);
+                            anyMatch = true;
+                        }
+                    }
+                    if (anyMatch) {
+                        sb.AppendLine(newLine);
+                        continue;
+                    }
+                }
+                {
+                    Match match = regexAssDialog.Match(line);
+                    if (match.Success)
+                    {
+                        string replacement = ChineseConverter.ToTraditional(match.Groups[1].Value);
+                        string newLine = ReplaceStrByPos(match.Groups[1].Value, match.Groups[1].Index, match.Groups[1].Length, replacement);
+                        sb.AppendLine(newLine);
+                        continue;
+                    }
+                }
+                sb.AppendLine(line);                             
+            }
+            return sb.ToString();
+        }
 
         private static string ReplaceStrByPos(string text, int index, int length, string replacement)
         {

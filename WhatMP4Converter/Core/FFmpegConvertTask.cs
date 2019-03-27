@@ -20,7 +20,7 @@ namespace WhatMP4Converter.Core
 
         public string AssFilePath { get; set; }
 
-        public FFmpegShrinkWidth ShrinkLimitWidth { get; set; }
+        public FFmpegShrinkWidth ShrinkVideoWidth { get; set; }
 
         public int GainFontSize { get; set; }
 
@@ -33,21 +33,13 @@ namespace WhatMP4Converter.Core
         private Regex regexAudio = new Regex(@"Audio: ([\w]+)[ ,]",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
-        //v1
-        //private Regex regexVideo = new Regex(@"Video: ([\w]+) [\w /,()]+, ([\d]{2,4})x([\d]{2,4})",
-        //            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
         //v2
-        private Regex regexVideo = new Regex(@"Video: ([\w]+)[\w \/,()]+, ([\d]{2,4})x([\d]{2,4})",
+        private Regex regexVideo = new Regex(@"Video: ([\w]+)[\w \/,()[\]]+,[ ]*([\d]{2,4})x([\d]{2,4})",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
-
-
-        //Video: ([\w]+)[\w \/,()]+, ([\d]{2,4})x([\d]{2,4})
-
 
         public FFmpegConvertTask(AppConf conf, string taskId) : base(conf, taskId)
         {
-            this.ShrinkLimitWidth = FFmpegShrinkWidth.HD;
+            this.ShrinkVideoWidth = FFmpegShrinkWidth.HD;
         }
 
         protected override void DoExecute()
@@ -101,16 +93,18 @@ namespace WhatMP4Converter.Core
                 string assFileName = Path.GetFileName(this.AssFilePath);
                 string assText = File.ReadAllText(this.AssFilePath, Encoding.UTF8);
                 assText = Helper.ChangeAssFontSize(assText, this.GainFontSize);
+                assText = ChineseConverter.ToTraditional(assText);
                 File.WriteAllText(Helper.GetRelativePath(assFileName), assText);
                 //File.Copy(this.AssFilePath, Helper.GetRelativePath(assFileName), true);
                 filters.Add(string.Format("subtitles='{0}'", assFileName));
             }
 
-            int limitWidth = GetShrinkWidth(ShrinkLimitWidth);
-            int videoWidth;
-            if (limitWidth > 0 && int.TryParse(this.VideoWidth, out videoWidth) && videoWidth > limitWidth)
+            int shrinkWidth = GetShrinkWidth(ShrinkVideoWidth);
+            int oriWidth;
+            if (shrinkWidth > 0 && int.TryParse(this.VideoWidth, out oriWidth) && oriWidth > shrinkWidth)
             {
-                filters.Add(string.Format("scale={0}:-1", conf.Shrink.Width));
+                videoParam = defaultVideoEncodeParam;
+                filters.Add(string.Format("scale={0}:-1", shrinkWidth));
             }
 
             string filtersParam = string.Empty;
@@ -178,7 +172,7 @@ namespace WhatMP4Converter.Core
                     {
                         TimeSpan time = TimeSpan.Parse(match.Groups[1].Value);
                         var progress = time.TotalSeconds / Duration.Value.TotalSeconds;
-                        BroadCastProgress(false, false, false, progress);
+                        BroadCastProgress(false, false, false, progress, null);
                     }
                 }
                 if (line == "Conversion failed!" || line.Contains("Invalid argument"))
@@ -277,11 +271,17 @@ namespace WhatMP4Converter.Core
                 if (missingFonds.Count > 0)
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendLine("系統找不到字型");
-                    foreach (string missingFont in missingFonds) {
-                        sb.AppendLine(missingFont);
+                    sb.Append("缺失 ");
+                    for (int i = 0; i < missingFonds.Count; i++) {
+                        if (i > 0 )
+                        {
+                            sb.Append(", ");
+                        }
+                        string missingFont = missingFonds[i];
+                        sb.Append(missingFont);
                     }
                     confirmMessage = sb.ToString();
+                    WriteLog(confirmMessage, LogLevel.Info);
                     return PreCheckResult.MissingFontAtAss;
                 }
 

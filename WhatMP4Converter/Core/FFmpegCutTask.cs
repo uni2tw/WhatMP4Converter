@@ -179,7 +179,7 @@ namespace WhatMP4Converter.Core
                     {
                         TimeSpan time = TimeSpan.Parse(match.Groups[1].Value);
                         var progress = time.TotalSeconds / Duration.Value.TotalSeconds;
-                        BroadCastProgress(false, false, false, progress);
+                        BroadCastProgress(false, false, false, progress, null);
                     }
                 }
                 if (line == "Conversion failed!" || line.Contains("Invalid argument"))

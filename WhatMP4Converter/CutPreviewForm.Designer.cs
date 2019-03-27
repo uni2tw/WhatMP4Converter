@@ -1,6 +1,6 @@
 ﻿namespace WhatMP4Converter
 {
-    partial class FormCutPreview
+    partial class CutPreviewForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormCutPreview));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CutPreviewForm));
             this.panel1 = new System.Windows.Forms.Panel();
             this.axWindowsMediaPlayer1 = new AxWMPLib.AxWindowsMediaPlayer();
             this.tbStartMinute = new System.Windows.Forms.TextBox();
@@ -41,8 +41,11 @@
             this.lbPointer = new System.Windows.Forms.Label();
             this.btnPreviewEnd = new System.Windows.Forms.Button();
             this.btnConfirm = new System.Windows.Forms.Button();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.lbStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -178,11 +181,32 @@
             this.btnConfirm.UseVisualStyleBackColor = false;
             this.btnConfirm.Click += new System.EventHandler(this.BtnConfirm_Click);
             // 
-            // FormCutPreview
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lbStatus});
+            this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
+            this.statusStrip1.Location = new System.Drawing.Point(0, 434);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.statusStrip1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.statusStrip1.Size = new System.Drawing.Size(720, 19);
+            this.statusStrip1.TabIndex = 12;
+            this.statusStrip1.Text = "123456";
+            // 
+            // lbStatus
+            // 
+            this.lbStatus.Name = "lbStatus";
+            this.lbStatus.Size = new System.Drawing.Size(41, 12);
+            this.lbStatus.Text = "123456";
+            this.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // CutPreviewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(720, 453);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.btnConfirm);
             this.Controls.Add(this.btnPreviewEnd);
             this.Controls.Add(this.lbPointer);
@@ -197,13 +221,15 @@
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "FormCutPreview";
+            this.Name = "CutPreviewForm";
             this.Text = "FormCutPreview";
             this.Load += new System.EventHandler(this.FormCutPreview_Load);
             this.Shown += new System.EventHandler(this.FormCutPreview_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FormCutPreview_KeyDown);
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -223,5 +249,7 @@
         private System.Windows.Forms.Label lbPointer;
         private System.Windows.Forms.Button btnPreviewEnd;
         private System.Windows.Forms.Button btnConfirm;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lbStatus;
     }
 }

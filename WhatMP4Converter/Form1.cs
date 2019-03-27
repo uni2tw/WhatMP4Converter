@@ -16,6 +16,7 @@ namespace WhatMP4Converter
         public class LiveViewColumns
         {
             public static int State = 1;
+            public static int FullPath = 2;
             public static int TaskId = 3;
             public static int Mode = 4;
             public static int InTask = 5;
@@ -234,7 +235,8 @@ namespace WhatMP4Converter
                     int gainFontSize = ((GainFontSizeDataItem)cbGainFontSize.SelectedItem).Value;
                     var convertTask = new FFmpegConvertTask(this.conf, theTaskId);
                     this.currentTask = convertTask;
-                    convertTask.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress, string taskId)
+                    convertTask.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, 
+                        double progress, string message, string taskId)
                     {
                         SafeInvoke(listView1, delegate ()
                         {
@@ -256,6 +258,10 @@ namespace WhatMP4Converter
                                 else if (isFinish && isFail == false)
                                 {
                                     item.SubItems[1].Text = "失敗";
+                                    if (string.IsNullOrEmpty(message) == false)
+                                    {
+                                        item.SubItems[1].Text += message;
+                                    }
                                 }
                                 else
                                 {
@@ -282,7 +288,7 @@ namespace WhatMP4Converter
                     convertTask.SrcFilePath = srcFilePath;
                     convertTask.DestFilePath = destFlePath;
                     convertTask.Quality = crf;
-                    convertTask.ShrinkLimitWidth = shrinkWidth;
+                    convertTask.ShrinkVideoWidth = shrinkWidth;
                     convertTask.GainFontSize = gainFontSize;
                     var asyncTask = Task.Factory.StartNew(delegate ()
                     {
@@ -312,7 +318,8 @@ namespace WhatMP4Converter
                     {
                         var task = new FFmpegMergeTask(this.conf, theTaskId);
                         this.currentTask = task;
-                        task.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress, string taskId)
+                        task.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, double progress,
+                            string message, string taskId)
                         {
                             SafeInvoke(listView1, delegate ()
                             {
@@ -608,7 +615,7 @@ namespace WhatMP4Converter
         private void ShowCutPreviewform(string taskId, string srcFilePath)
         {
             //string temp = Path.GetFullPath("./");
-            FormCutPreview previewForm = new FormCutPreview();
+            CutPreviewForm previewForm = new CutPreviewForm();
             previewForm.conf = this.conf;
             previewForm.Text = Path.GetFileName(srcFilePath);
             previewForm.SrcFilePath = srcFilePath;
@@ -617,7 +624,7 @@ namespace WhatMP4Converter
 
             FFmpegCutTask task = new FFmpegCutTask(this.conf, taskId);
             task.StartTime = previewForm.StartTime;
-            task.ToTime = previewForm.TotTime;
+            task.ToTime = previewForm.endTime;
             task.SrcFilePath = srcFilePath;
             string renameToMP4 = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";             
             task.DestFilePath = Path.Combine(conf.Output, renameToMP4);
@@ -631,11 +638,10 @@ namespace WhatMP4Converter
 
         private void CmiOpenFolder_Click(object sender, EventArgs e)
         {
-            var item = listView1.SelectedItems[0];
+            var item = listView1.SelectedItems[LiveViewColumns.FullPath];
             Process.Start(new ProcessStartInfo
             {
                  FileName = "explorer",
-                 WorkingDirectory = conf.Output,
                  Arguments = "/select," + item.Text
             });
         }
