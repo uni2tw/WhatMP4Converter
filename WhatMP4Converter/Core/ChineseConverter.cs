@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace WhatMP4Converter.Core
@@ -10,7 +11,7 @@ namespace WhatMP4Converter.Core
     {
         static Dictionary<int, Dictionary<string, string>> dictGroups = new Dictionary<int, Dictionary<string, string>>();
 
-        const int WordMinLen = 2;
+        const int WordMinLen = 1;
         const int WordMaxLen = 12;
 
         static ChineseConverter()
@@ -25,13 +26,30 @@ namespace WhatMP4Converter.Core
             DirectoryInfo diDictionary = new DirectoryInfo(Helper.GetRelativePath("Dictionary"));
             if (diDictionary.Exists)
             {
-                var fileInfos = diDictionary.GetFiles("*.dat");
-                foreach(var fi in fileInfos)
+                var fileInfos = new List<FileInfo>(diDictionary.GetFiles("*.dat"));
+                //把 Other.dat 放到最後處理，後面的設定可以蓋掉前面的
+                var fiOther = fileInfos.FirstOrDefault(t => t.Name.Equals("Other.dat"));
+                fileInfos.Remove(fiOther);
+                fileInfos.Add(fiOther);
+                foreach (var fi in fileInfos)
                 {
+                    int minWord = WordMinLen;
+                    if (fi.Name.Equals("Other.Dat", StringComparison.OrdinalIgnoreCase) == false)
+                    {
+                        minWord = 2;
+                    }
                     string[] lines = File.ReadAllLines(fi.FullName);
                     for (int i=0;i< lines.Length;i++)
                     {
                         string line = lines[i].Trim();
+                        if (string.IsNullOrEmpty(line))
+                        {
+                            continue;
+                        }
+                        if (line[0] == ':' || line[0] == '-')
+                        {
+                            continue;
+                        }
                         string[] parts = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length != 2)
                         {
@@ -40,12 +58,35 @@ namespace WhatMP4Converter.Core
                         string s = parts[0].Trim();
                         string t = parts[1].Trim();
 
-                        if (dictGroups.ContainsKey(t.Length))
+                        if (s.Length < minWord || s.Length >WordMaxLen)
                         {
-                            var dict = dictGroups[t.Length];
+                            continue;
+                        }
+
+                        if (dictGroups.ContainsKey(s.Length))
+                        {
+                            var dict = dictGroups[s.Length];
                             if (dict.ContainsKey(s) == false)
                             {
-                                dict.Add(s, t);
+                                if (t.Contains(" "))
+                                {
+                                    dict.Add(s, t.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                                }
+                                else
+                                {
+                                    dict.Add(s, t);
+                                }
+                            }
+                            else
+                            {
+                                if (t.Contains(" "))
+                                {
+                                    dict[s] = t.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[0];
+                                }
+                                else
+                                {
+                                    dict[s] = t;
+                                }
                             }
                         }
 

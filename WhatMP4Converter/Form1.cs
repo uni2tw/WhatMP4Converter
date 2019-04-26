@@ -636,6 +636,12 @@ namespace WhatMP4Converter
             previewForm.Dispose();
         }
 
+        private void ShowExtractAssForm()
+        {
+            ExtractAssForm form = new ExtractAssForm();
+            form.ShowDialog();
+        }
+
         private void CmiOpenFolder_Click(object sender, EventArgs e)
         {
             var item = listView1.SelectedItems[LiveViewColumns.FullPath];
@@ -656,6 +662,11 @@ namespace WhatMP4Converter
             {
                 listView1.ContextMenuStrip = contextMenuStripFileTree;
             }
+        }
+
+        private void MenuItemExtractAss_Click(object sender, EventArgs e)
+        {
+            ShowExtractAssForm();
         }
     }
 }

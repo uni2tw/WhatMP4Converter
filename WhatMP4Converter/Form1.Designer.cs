@@ -54,6 +54,7 @@
             this.menuItemSwitchMain = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemSwitchLog = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemQuit = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItemExtractAss = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStripFileTree.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -290,6 +291,7 @@
             this.nenuItemOpenFiles,
             this.menuItemSwitchMain,
             this.menuItemSwitchLog,
+            this.menuItemExtractAss,
             this.menuItemQuit});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -327,6 +329,13 @@
             this.menuItemQuit.Text = "結束";
             this.menuItemQuit.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal;
             this.menuItemQuit.Click += new System.EventHandler(this.menuItemQuit_Click);
+            // 
+            // menuItemExtractAss
+            // 
+            this.menuItemExtractAss.Name = "menuItemExtractAss";
+            this.menuItemExtractAss.Size = new System.Drawing.Size(65, 20);
+            this.menuItemExtractAss.Text = "字幕工具";
+            this.menuItemExtractAss.Click += new System.EventHandler(this.MenuItemExtractAss_Click);
             // 
             // formMain
             // 
@@ -391,6 +400,7 @@
         private System.Windows.Forms.ComboBox cbShrinkWidth;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripFileTree;
         private System.Windows.Forms.ToolStripMenuItem cmiOpenFolder;
+        private System.Windows.Forms.ToolStripMenuItem menuItemExtractAss;
     }
 }
 
