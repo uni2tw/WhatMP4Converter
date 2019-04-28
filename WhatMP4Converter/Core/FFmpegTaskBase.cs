@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace WhatMP4Converter.Core
 {
@@ -24,6 +26,7 @@ namespace WhatMP4Converter.Core
         public PreCheckResult CheckResult { get; set; }
 
         public string SrcFilePath { get; set; }
+
         public string DestFilePath { get; set; }
 
         public bool IsClosed { get; set; }

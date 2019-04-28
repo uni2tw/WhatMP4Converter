@@ -230,12 +230,12 @@ namespace WhatMP4Converter
                         break;
                     }
                     FFmpegQuality crf = (FFmpegQuality)cbCrf.SelectedIndex;
-                    
+
                     FFmpegShrinkWidth shrinkWidth = (FFmpegShrinkWidth)cbShrinkWidth.SelectedIndex;
                     int gainFontSize = ((GainFontSizeDataItem)cbGainFontSize.SelectedItem).Value;
                     var convertTask = new FFmpegConvertTask(this.conf, theTaskId);
                     this.currentTask = convertTask;
-                    convertTask.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail, 
+                    convertTask.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail,
                         double progress, string message, string taskId)
                     {
                         SafeInvoke(listView1, delegate ()
@@ -392,6 +392,84 @@ namespace WhatMP4Converter
                         item.SubItems[LiveViewColumns.State].Text = "設定";
                         ShowCutPreviewform(theTaskId, filePath);
                     }
+                }
+                else if (mode == OperatingMode.ExtractAss)
+                {
+                    string srcFilePath = null;
+                    foreach (ListViewItem item in this.listView1.Items)
+                    {
+                        string itemTaskId = item.SubItems[LiveViewColumns.TaskId].Text;
+                        if (itemTaskId != theTaskId)
+                        {
+                            continue;
+                        }
+                        srcFilePath = item.SubItems[2].Text;
+
+                        item.SubItems[LiveViewColumns.InTask].Text = "1";
+                        break;
+                    }
+
+                    FFmpegExtractAssTask task = new FFmpegExtractAssTask(conf, theTaskId);
+                    this.currentTask = task;
+                    task.SrcFilePath = srcFilePath;
+
+                    task.OnLog += delegate (string str, LogLevel level)
+                    {
+                        SafeInvoke(logBox, delegate ()
+                        {
+                            if (level == LogLevel.Debug)
+                            {
+                                logBox.AppendText(str + Environment.NewLine);
+                            }
+                            else if (level == LogLevel.Info)
+                            {
+                                logBox.AppendText(str + Environment.NewLine, Color.Blue);
+                            }
+                        });
+                    };
+                    task.OnProgress += delegate (bool isStart, bool isFinish, bool? isFail,
+                        double progress, string message, string taskId)
+                    {
+                        SafeInvoke(listView1, delegate ()
+                        {
+                            foreach (ListViewItem item in this.listView1.Items)
+                            {
+                                string itemTsakId = item.SubItems[3].Text;
+                                if (itemTsakId != taskId)
+                                {
+                                    continue;
+                                }
+                                if (isStart)
+                                {
+                                    item.SubItems[1].Text = "轉換";
+                                }
+                                else if (isFinish && isFail == true)
+                                {
+                                    item.SubItems[1].Text = "完成";
+                                }
+                                else if (isFinish && isFail == false)
+                                {
+                                    item.SubItems[1].Text = "失敗";
+                                    if (string.IsNullOrEmpty(message) == false)
+                                    {
+                                        item.SubItems[1].Text += message;
+                                    }
+                                }
+                                else
+                                {
+                                    item.SubItems[1].Text = string.Format("{0:0.##\\%}", progress * 100);
+                                }
+                            }
+                        });
+                    };
+                    var asyncTask = Task.Factory.StartNew(delegate ()
+                    {
+                        task.Execute();
+                    });
+                    asyncTask.ContinueWith(delegate (Task t)
+                    {
+                        this.currentTask = null;
+                    });
                 }
             }
             finally
@@ -636,12 +714,6 @@ namespace WhatMP4Converter
             previewForm.Dispose();
         }
 
-        private void ShowExtractAssForm()
-        {
-            ExtractAssForm form = new ExtractAssForm();
-            form.ShowDialog();
-        }
-
         private void CmiOpenFolder_Click(object sender, EventArgs e)
         {
             var item = listView1.SelectedItems[LiveViewColumns.FullPath];
@@ -664,9 +736,5 @@ namespace WhatMP4Converter
             }
         }
 
-        private void MenuItemExtractAss_Click(object sender, EventArgs e)
-        {
-            ShowExtractAssForm();
-        }
     }
 }

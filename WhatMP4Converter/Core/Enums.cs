@@ -30,7 +30,8 @@ namespace WhatMP4Converter.Core
         None = -1,
         Convert = 0,
         Merge = 1,
-        Cut = 2
+        Cut = 2,
+        ExtractAss = 3
     }
 
     public enum FFmpegShrinkWidth

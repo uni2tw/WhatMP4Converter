@@ -48,13 +48,14 @@
             this.tabMergePage = new System.Windows.Forms.TabPage();
             this.lbMergeModeMessage = new System.Windows.Forms.Label();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabExtractAssPage = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.nenuItemOpenFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemSwitchMain = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemSwitchLog = new System.Windows.Forms.ToolStripMenuItem();
             this.menuItemQuit = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuItemExtractAss = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStripFileTree.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -63,6 +64,7 @@
             this.tabControl1.SuspendLayout();
             this.tabConvertPage.SuspendLayout();
             this.tabMergePage.SuspendLayout();
+            this.tabExtractAssPage.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -133,7 +135,7 @@
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Location = new System.Drawing.Point(0, 0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(308, 101);
+            this.groupBox2.Size = new System.Drawing.Size(215, 101);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "設定";
@@ -164,12 +166,13 @@
             this.tabControl1.Controls.Add(this.tabConvertPage);
             this.tabControl1.Controls.Add(this.tabMergePage);
             this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabExtractAssPage);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tabControl1.Location = new System.Drawing.Point(308, 0);
+            this.tabControl1.Location = new System.Drawing.Point(215, 0);
             this.tabControl1.Multiline = true;
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(324, 101);
+            this.tabControl1.Size = new System.Drawing.Size(417, 101);
             this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tabControl1.TabIndex = 15;
             // 
@@ -183,7 +186,7 @@
             this.tabConvertPage.Location = new System.Drawing.Point(4, 25);
             this.tabConvertPage.Name = "tabConvertPage";
             this.tabConvertPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tabConvertPage.Size = new System.Drawing.Size(316, 72);
+            this.tabConvertPage.Size = new System.Drawing.Size(409, 72);
             this.tabConvertPage.TabIndex = 0;
             this.tabConvertPage.Text = "轉換";
             this.tabConvertPage.UseVisualStyleBackColor = true;
@@ -198,7 +201,7 @@
             "最大寬度: 1920",
             "最大寬度: 1280",
             "最大寬度: 720"});
-            this.cbShrinkWidth.Location = new System.Drawing.Point(6, 40);
+            this.cbShrinkWidth.Location = new System.Drawing.Point(15, 39);
             this.cbShrinkWidth.Margin = new System.Windows.Forms.Padding(3, 8, 3, 3);
             this.cbShrinkWidth.Name = "cbShrinkWidth";
             this.cbShrinkWidth.Size = new System.Drawing.Size(103, 20);
@@ -239,7 +242,7 @@
             "壓縮畫質: 好",
             "壓縮畫質: 標準",
             "壓縮畫質: 差"});
-            this.cbCrf.Location = new System.Drawing.Point(6, 9);
+            this.cbCrf.Location = new System.Drawing.Point(15, 8);
             this.cbCrf.Margin = new System.Windows.Forms.Padding(3, 8, 3, 3);
             this.cbCrf.Name = "cbCrf";
             this.cbCrf.Size = new System.Drawing.Size(103, 20);
@@ -261,7 +264,7 @@
             this.tabMergePage.Location = new System.Drawing.Point(4, 25);
             this.tabMergePage.Name = "tabMergePage";
             this.tabMergePage.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMergePage.Size = new System.Drawing.Size(316, 72);
+            this.tabMergePage.Size = new System.Drawing.Size(409, 72);
             this.tabMergePage.TabIndex = 1;
             this.tabMergePage.Text = "合併";
             this.tabMergePage.UseVisualStyleBackColor = true;
@@ -280,10 +283,29 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(316, 72);
+            this.tabPage1.Size = new System.Drawing.Size(409, 72);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "裁切";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabExtractAssPage
+            // 
+            this.tabExtractAssPage.Controls.Add(this.label1);
+            this.tabExtractAssPage.Location = new System.Drawing.Point(4, 25);
+            this.tabExtractAssPage.Name = "tabExtractAssPage";
+            this.tabExtractAssPage.Size = new System.Drawing.Size(409, 72);
+            this.tabExtractAssPage.TabIndex = 3;
+            this.tabExtractAssPage.Text = "匯出字幕";
+            this.tabExtractAssPage.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(18, 22);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(135, 12);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "匯出MKV的內嵌ASS字幕";
             // 
             // menuStrip1
             // 
@@ -291,7 +313,6 @@
             this.nenuItemOpenFiles,
             this.menuItemSwitchMain,
             this.menuItemSwitchLog,
-            this.menuItemExtractAss,
             this.menuItemQuit});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -330,13 +351,6 @@
             this.menuItemQuit.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal;
             this.menuItemQuit.Click += new System.EventHandler(this.menuItemQuit_Click);
             // 
-            // menuItemExtractAss
-            // 
-            this.menuItemExtractAss.Name = "menuItemExtractAss";
-            this.menuItemExtractAss.Size = new System.Drawing.Size(65, 20);
-            this.menuItemExtractAss.Text = "字幕工具";
-            this.menuItemExtractAss.Click += new System.EventHandler(this.MenuItemExtractAss_Click);
-            // 
             // formMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -366,6 +380,8 @@
             this.tabConvertPage.PerformLayout();
             this.tabMergePage.ResumeLayout(false);
             this.tabMergePage.PerformLayout();
+            this.tabExtractAssPage.ResumeLayout(false);
+            this.tabExtractAssPage.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -400,7 +416,8 @@
         private System.Windows.Forms.ComboBox cbShrinkWidth;
         private System.Windows.Forms.ContextMenuStrip contextMenuStripFileTree;
         private System.Windows.Forms.ToolStripMenuItem cmiOpenFolder;
-        private System.Windows.Forms.ToolStripMenuItem menuItemExtractAss;
+        private System.Windows.Forms.TabPage tabExtractAssPage;
+        private System.Windows.Forms.Label label1;
     }
 }
 
