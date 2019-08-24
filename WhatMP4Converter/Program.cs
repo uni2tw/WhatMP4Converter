@@ -21,10 +21,10 @@ namespace WhatMP4Converter
             Application.SetCompatibleTextRenderingDefault(false);
 
             new ChineseConverterFixture().ToTraditionalTest();
-            System.IO.File.WriteAllText(@"c:\temp\1.txt",
-                ChineseConverter.ToTraditional(
-                    System.IO.File.ReadAllText(@"H:\[VCB-Studio] Bungo Stray Dogs [Ma10p_1080p]\Bungo Stray Dogs [13].ass",
-                    System.Text.Encoding.UTF8)));
+            //System.IO.File.WriteAllText(@"c:\temp\1.txt",
+            //    ChineseConverter.ToTraditional(
+            //        System.IO.File.ReadAllText(@"H:\[VCB-Studio] Bungo Stray Dogs [Ma10p_1080p]\Bungo Stray Dogs [13].ass",
+            //        System.Text.Encoding.UTF8)));
 
             //Helper.ConvertAssToTraditionalChinese(
             //    @"Dialogue: 0,0:01:53.47,0:01:54.35,*Default,NTP,0000,0000,0000,,有什么問題嗎\N{\fn微软雅黑\fs14}There a problem?");

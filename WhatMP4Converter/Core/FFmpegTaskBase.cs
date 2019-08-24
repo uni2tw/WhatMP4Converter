@@ -109,6 +109,9 @@ namespace WhatMP4Converter.Core
                     sb.Append(conf.Quality.Low.Preset.ToString());
                 }
 
+                //部份舊的avi檔無法轉換，需要加上此設定
+                sb.Append(" -max_muxing_queue_size 1024");
+
                 return sb.ToString();
             }
 

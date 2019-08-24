@@ -24,6 +24,12 @@ namespace WhatMP4Converter.Tests
             Debug.Assert(ChineseConverter.ToTraditional("觉得今晚会更有平时的风味") == "覺得今晚會更有平時的風味");
             Debug.Assert(ChineseConverter.ToTraditional("忙活到八点 才弄来这么一个老式怀表") == "忙碌到八點 才弄來這麼一個老式懷錶");
             Debug.Assert(ChineseConverter.ToTraditional("问我這種最底層员工的工作 也不會有意思的") == "問我這種最底層員工的工作 也不會有意思的");
+            Debug.Assert(ChineseConverter.ToTraditional("可能需要几天 也许是几周的时间") == "可能需要幾天 也許是幾週的時間");
+            Debug.Assert(ChineseConverter.ToTraditional("让人欲罢不能") == "讓人欲罷不能");
+            Debug.Assert(ChineseConverter.ToTraditional("我認識的一位占卜師偶然間介紹過這裡") == "我認識的一位占卜師偶然間介紹過這裡");
+            Debug.Assert(ChineseConverter.ToTraditional("經過了如此漫長的歲月") == "經過了如此漫長的歲月");
+            Debug.Assert(ChineseConverter.ToTraditional("這不僅是一個人的執念啊") == "這不僅是一個人的執念啊");
+            
 
 
         }

@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Core\AppConf.cs" />
     <Compile Include="Core\ChineseConverter.cs" />
+    <Compile Include="Core\AssHelper.cs" />
     <Compile Include="Core\ComboBoxItem.cs" />
     <Compile Include="Core\Enums.cs" />
     <Compile Include="Core\Extensions.cs" />

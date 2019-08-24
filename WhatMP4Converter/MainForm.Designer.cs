@@ -40,6 +40,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabConvertPage = new System.Windows.Forms.TabPage();
+            this.chkAlwaysEncode = new System.Windows.Forms.CheckBox();
             this.cbShrinkWidth = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.cbGainFontSize = new System.Windows.Forms.ComboBox();
@@ -178,6 +179,7 @@
             // 
             // tabConvertPage
             // 
+            this.tabConvertPage.Controls.Add(this.chkAlwaysEncode);
             this.tabConvertPage.Controls.Add(this.cbShrinkWidth);
             this.tabConvertPage.Controls.Add(this.label3);
             this.tabConvertPage.Controls.Add(this.cbGainFontSize);
@@ -190,6 +192,17 @@
             this.tabConvertPage.TabIndex = 0;
             this.tabConvertPage.Text = "轉換";
             this.tabConvertPage.UseVisualStyleBackColor = true;
+            // 
+            // chkAlwaysEncode
+            // 
+            this.chkAlwaysEncode.AutoSize = true;
+            this.chkAlwaysEncode.Location = new System.Drawing.Point(236, 43);
+            this.chkAlwaysEncode.Name = "chkAlwaysEncode";
+            this.chkAlwaysEncode.Size = new System.Drawing.Size(72, 16);
+            this.chkAlwaysEncode.TabIndex = 20;
+            this.chkAlwaysEncode.Text = "強制重轉";
+            this.chkAlwaysEncode.UseVisualStyleBackColor = true;
+            this.chkAlwaysEncode.CheckedChanged += new System.EventHandler(this.chkAlwaysEncode_CheckedChanged);
             // 
             // cbShrinkWidth
             // 
@@ -418,6 +431,7 @@
         private System.Windows.Forms.ToolStripMenuItem cmiOpenFolder;
         private System.Windows.Forms.TabPage tabExtractAssPage;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox chkAlwaysEncode;
     }
 }
 

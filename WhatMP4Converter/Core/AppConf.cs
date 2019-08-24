@@ -324,6 +324,9 @@ namespace WhatMP4Converter.Core
     public class QualitySection
     {
         public string Default { get; set; }
+
+        public bool alwasy_encode { get; set; }
+
         public QualityOptionSection High { get; set; }
         public QualityOptionSection Standard { get; set; }
         public QualityOptionSection Low { get; set; }

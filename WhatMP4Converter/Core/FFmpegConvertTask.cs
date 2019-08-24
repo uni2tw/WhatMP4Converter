@@ -69,7 +69,8 @@ namespace WhatMP4Converter.Core
                 audioParam = "-c:a aac -b:a 128k -ac 2";
             }
             string videoParam;
-            if (this.VideoEncodeType.Equals("h264", StringComparison.OrdinalIgnoreCase))
+            if (conf.Quality.alwasy_encode == false
+                && this.VideoEncodeType.Equals("h264", StringComparison.OrdinalIgnoreCase))
             {
                 videoParam = "-c:v copy";
             }
@@ -94,7 +95,13 @@ namespace WhatMP4Converter.Core
                 string assFileName = Path.GetFileName(this.AssFilePath);
                 string assText = File.ReadAllText(this.AssFilePath, Encoding.UTF8);
                 assText = Helper.ChangeAssFontSize(assText, this.GainFontSize);
-                assText = ChineseConverter.ToTraditional(assText);
+
+
+
+                //assText = ChineseConverter.ToTraditional(assText);
+                //List<string> assLines = AssHelper.ToTraditional(assText);
+                //assText = string.Join(Environment.NewLine, assLines);
+                assText = Helper.ConvertAssToTraditionalChinese(assText);
                 File.WriteAllText(Helper.GetRelativePath(assFileName), assText);
                 //File.Copy(this.AssFilePath, Helper.GetRelativePath(assFileName), true);
                 filters.Add(string.Format("subtitles='{0}'", assFileName));

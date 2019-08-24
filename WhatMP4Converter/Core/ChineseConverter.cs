@@ -101,6 +101,7 @@ namespace WhatMP4Converter.Core
         //沒有在意執行速度的版本，整行掃瞄比對
         public static string ToTraditional(string line)
         {
+
             StringBuilder sb = new StringBuilder();
 
             for (int i = 0; i < line.Length;i++)

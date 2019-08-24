@@ -63,6 +63,7 @@ namespace WhatMP4Converter
 
             conf = AppConf.Reload();
             chkRun.Checked = conf.Auto;
+            chkAlwaysEncode.Checked = conf.Quality.alwasy_encode;
             this.lbOutputPath.Text = conf.Output;
 
             if (string.IsNullOrEmpty(this.lbOutputPath.Text) || Directory.Exists(this.lbOutputPath.Text) == false)
@@ -390,7 +391,13 @@ namespace WhatMP4Converter
                         inputFiles.Add(filePath);
                         item.SubItems[LiveViewColumns.InTask].Text = "1";
                         item.SubItems[LiveViewColumns.State].Text = "設定";
-                        ShowCutPreviewform(theTaskId, filePath);
+                        if (ShowCutPreviewform(theTaskId, filePath))
+                        {
+                            item.SubItems[LiveViewColumns.State].Text = "完成";
+                        } else
+                        {
+                            item.SubItems[LiveViewColumns.State].Text = "取消";
+                        }
                     }
                 }
                 else if (mode == OperatingMode.ExtractAss)
@@ -516,7 +523,9 @@ namespace WhatMP4Converter
                                 && ext != ".mp4"
                                 && ext != ".mpg"
                                 && ext != ".mpeg"
-                                && ext != ".avi")
+                                && ext != ".avi"
+                                && ext != ".ts"
+                                )
                 {
                     allowDrop = false;
                     break;
@@ -546,7 +555,7 @@ namespace WhatMP4Converter
                     continue;
                 }
                 string fileName= Path.GetFileName(filePath);
-                string ext = Path.GetExtension(filePath);
+                string ext = Path.GetExtension(filePath).ToLower();
                 if (this.Mode== OperatingMode.Convert 
                     && ext != ".mkv"
                     && ext != ".rm"
@@ -555,7 +564,9 @@ namespace WhatMP4Converter
                     && ext != ".mp4"
                     && ext != ".mpg"
                     && ext != ".mpeg"
-                    && ext != ".avi")
+                    && ext != ".avi"
+                    && ext != ".ts"
+                    )
                 {
                     MessageBox.Show(ext +" 格式不支援");
                     return;
@@ -690,7 +701,7 @@ namespace WhatMP4Converter
             }
         }
 
-        private void ShowCutPreviewform(string taskId, string srcFilePath)
+        private bool ShowCutPreviewform(string taskId, string srcFilePath)
         {
             //string temp = Path.GetFullPath("./");
             CutPreviewForm previewForm = new CutPreviewForm();
@@ -699,19 +710,26 @@ namespace WhatMP4Converter
             previewForm.SrcFilePath = srcFilePath;
             previewForm.ShowDialog();
             //MessageBox.Show(previewForm.TotTime.ToString());
+            if (previewForm.Result)
+            {
+                FFmpegCutTask task = new FFmpegCutTask(this.conf, taskId);
+                task.StartTime = previewForm.StartTime;
+                task.ToTime = previewForm.endTime;
+                task.SrcFilePath = srcFilePath;
+                string renameToMP4 = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";
+                task.DestFilePath = Path.Combine(conf.Output, renameToMP4);
+                task.IsPreview = false;
+                task.Execute();
+                previewForm.Dispose();
+                return true;
+            } else
+            {
+                previewForm.Dispose();
+                return false;
+            }
+            
 
-            FFmpegCutTask task = new FFmpegCutTask(this.conf, taskId);
-            task.StartTime = previewForm.StartTime;
-            task.ToTime = previewForm.endTime;
-            task.SrcFilePath = srcFilePath;
-            string renameToMP4 = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";             
-            task.DestFilePath = Path.Combine(conf.Output, renameToMP4);
-            task.IsPreview = false;
-            task.Execute();
 
-
-
-            previewForm.Dispose();
         }
 
         private void CmiOpenFolder_Click(object sender, EventArgs e)
@@ -736,5 +754,9 @@ namespace WhatMP4Converter
             }
         }
 
+        private void chkAlwaysEncode_CheckedChanged(object sender, EventArgs e)
+        {
+            conf.Quality.alwasy_encode = chkAlwaysEncode.Checked;
+        }
     }
 }

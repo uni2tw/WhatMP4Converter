@@ -166,7 +166,8 @@ namespace WhatMP4Converter.Core
                     if (match.Success)
                     {
                         string replacement = ChineseConverter.ToTraditional(match.Groups[1].Value);
-                        string newLine = ReplaceStrByPos(match.Groups[1].Value, match.Groups[1].Index, match.Groups[1].Length, replacement);
+                        string newLine = ReplaceStrByPos(line, match.Groups[1].Index, match.Groups[1].Length, replacement);
+                        //string newLine = ReplaceStrByPos(match.Groups[1].Value, match.Groups[1].Index, match.Groups[1].Length, replacement);
                         sb.AppendLine(newLine);
                         continue;
                     }

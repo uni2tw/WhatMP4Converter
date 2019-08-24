@@ -9,19 +9,21 @@ using System.Threading.Tasks;
 
 namespace WhatMP4Converter.Core
 {
+    public class MpegStreamInfo
+    {
+        public string Id { get; set; }
+        public string SubType { get; set; }
+        public string Type { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2}", Id, Type, SubType);
+        }
+    }
+
     public class FFmpegExtractAssTask : FFmpegTaskBase
     {
-        public class StreamInfo
-        {
-            public string Id { get; set; }
-            public string SubType { get; set; }
-            public string Type { get; set; }
 
-            public override string ToString()
-            {
-                return string.Format("{0} {1} {2}", Id, Type, SubType);
-            }
-        }
         private Regex regexStreamInfo = new Regex(@"[sS]tream #([\d]:[\d]+)[(\w)]*: ([Audio|Video|Subtitle|Attachment]*): ([\w]*)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
         public FFmpegExtractAssTask(AppConf conf, string taskId) : base(conf, taskId)
@@ -37,20 +39,25 @@ namespace WhatMP4Converter.Core
 
         protected override void DoExecute()
         {
-            List<StreamInfo> infos = new List<StreamInfo>();
+            List<MpegStreamInfo> infos = new List<MpegStreamInfo>();
             if (DoList(infos))
             {
                 this.Result = DoExtract(infos);
             }
         }
 
-        private bool DoExtract(List<StreamInfo> streamInfos)
+        private bool DoExtract(List<MpegStreamInfo> streamInfos)
         {
-            streamInfos = streamInfos.Where(t =>
+            List<MpegStreamInfo> subtitleStreamInfos = new List<MpegStreamInfo>();
+            subtitleStreamInfos.AddRange(streamInfos.Where(t =>
                 t.Type.Equals("Subtitle", StringComparison.OrdinalIgnoreCase) &&
-                t.SubType.Equals("ass", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            foreach (StreamInfo streamInfo in streamInfos)
+                t.SubType.Equals("ass", StringComparison.OrdinalIgnoreCase)));
+
+            subtitleStreamInfos.AddRange(streamInfos.Where(t =>
+                t.Type.Equals("Subtitle", StringComparison.OrdinalIgnoreCase) &&
+                t.SubType.Equals("subrip", StringComparison.OrdinalIgnoreCase)));
+
+            foreach (MpegStreamInfo streamInfo in subtitleStreamInfos)
             {
                 string streamIdx = string.Empty;
                 if (streamInfos.Count  > 1)
@@ -67,12 +74,16 @@ namespace WhatMP4Converter.Core
                 {
                     return false;
                 }
+                if (File.Exists(destAssFilePath))
+                {
+                    AssHelper.ChangeAllFontName(destAssFilePath, "方正黑体_GBK");
+                }
 
             }
             return true;
         }
 
-        public bool DoExtractAss(StreamInfo info, string destAssFilePath)
+        public bool DoExtractAss(MpegStreamInfo info, string destAssFilePath)
         {
 
 
@@ -121,7 +132,7 @@ namespace WhatMP4Converter.Core
             return result;
         }
 
-        public bool DoList(List<StreamInfo> infos)
+        public bool DoList(List<MpegStreamInfo> infos)
         {
             bool result = true;
             DateTime startTime = DateTime.Now;
@@ -147,7 +158,7 @@ namespace WhatMP4Converter.Core
 
                 Match match = regexStreamInfo.Match(line);
                 if (match.Success) {
-                    infos.Add(new StreamInfo
+                    infos.Add(new MpegStreamInfo
                     {
                         Id = match.Groups[1].Value,
                         Type = match.Groups[2].Value,
