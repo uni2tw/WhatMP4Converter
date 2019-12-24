@@ -59,14 +59,17 @@ namespace WhatMP4Converter.Core
             proc = new Process();
             string defaultVideoEncodeParam = GetDefaultVideoEncodeParam(Quality);
 
-            string audioParam;
-            if (this.AudioEncodeType.Equals("aac", StringComparison.OrdinalIgnoreCase))
+            string audioParam = string.Empty;
+            if (this.AudioEncodeType != null)
             {
-                audioParam = "-c:a copy";
-            }
-            else
-            {
-                audioParam = "-c:a aac -b:a 128k -ac 2";
+                if (this.AudioEncodeType.Equals("aac", StringComparison.OrdinalIgnoreCase))
+                {
+                    audioParam = "-c:a copy";
+                }
+                else
+                {
+                    audioParam = "-c:a aac -b:a 128k -ac 2";
+                }
             }
             string videoParam;
             if (conf.Quality.alwasy_encode == false
@@ -109,10 +112,12 @@ namespace WhatMP4Converter.Core
 
             int shrinkWidth = GetShrinkWidth(ShrinkVideoWidth);
             int oriWidth;
-            if (shrinkWidth > 0 && int.TryParse(this.VideoWidth, out oriWidth) && oriWidth > shrinkWidth)
+            if (shrinkWidth > 0 && int.TryParse(this.VideoWidth, out oriWidth) && 
+                oriWidth > shrinkWidth)
             {
                 videoParam = defaultVideoEncodeParam;
-                filters.Add(string.Format("scale={0}:-1", shrinkWidth));
+                //filters.Add(string.Format("scale={0}:-1", shrinkWidth));
+                filters.Add(string.Format("scale={0}:trunc(ow/a/2)*2", shrinkWidth));
             }
 
             string filtersParam = string.Empty;
@@ -249,8 +254,9 @@ namespace WhatMP4Converter.Core
 
             proc.WaitForExit();
 
-            if (string.IsNullOrEmpty(this.VideoEncodeType) ||
-                string.IsNullOrEmpty(this.AudioEncodeType))
+            //if (string.IsNullOrEmpty(this.VideoEncodeType) ||
+            //    string.IsNullOrEmpty(this.AudioEncodeType))
+            if (string.IsNullOrEmpty(this.VideoEncodeType))
             {
                 result = false;
             }

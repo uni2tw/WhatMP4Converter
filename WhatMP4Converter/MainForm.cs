@@ -719,6 +719,8 @@ namespace WhatMP4Converter
                 string renameToMP4 = Path.GetFileNameWithoutExtension(srcFilePath) + ".mp4";
                 task.DestFilePath = Path.Combine(conf.Output, renameToMP4);
                 task.IsPreview = false;
+                FFmpegShrinkWidth shrinkWidth = (FFmpegShrinkWidth)cbShrinkWidth.SelectedIndex;
+                task.ShrinkVideoWidth = shrinkWidth;
                 task.Execute();
                 previewForm.Dispose();
                 return true;

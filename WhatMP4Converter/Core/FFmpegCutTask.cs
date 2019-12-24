@@ -34,6 +34,8 @@ namespace WhatMP4Converter.Core
         }
 
         public bool IsPreview { get; set; }
+        public FFmpegShrinkWidth ShrinkVideoWidth { get; set; }
+
         protected override void DoExecute()
         {
             this.Result = DoInfo();
@@ -106,11 +108,14 @@ namespace WhatMP4Converter.Core
 
             List<string> filters = new List<string>();
 
-            int videoWidth;
-            if (conf.Shrink != null && conf.Shrink.Auto && conf.Shrink.Width > 0 &&
-                int.TryParse(this.VideoWidth, out videoWidth) && videoWidth > conf.Shrink.Width)
+            int shrinkWidth = GetShrinkWidth(ShrinkVideoWidth);
+            int oriWidth;
+            if (shrinkWidth > 0 && int.TryParse(this.VideoWidth, out oriWidth) &&
+                oriWidth > shrinkWidth)
             {
-                filters.Add(string.Format("scale={0}:-1", conf.Shrink.Width));
+                videoParam = defaultVideoEncodeParam;
+                //filters.Add(string.Format("scale={0}:-1", shrinkWidth));
+                filters.Add(string.Format("scale={0}:trunc(ow/a/2)*2", shrinkWidth));
             }
 
             string filtersParam = string.Empty;
